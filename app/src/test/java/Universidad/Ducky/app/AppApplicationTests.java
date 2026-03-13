@@ -1,10 +1,10 @@
-package UniversidadDucky.demo;
+package Universidad.Ducky.app;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class WebAppApplicationTests {
+class AppApplicationTests {
 
 	@Test
 	void contextLoads() {
