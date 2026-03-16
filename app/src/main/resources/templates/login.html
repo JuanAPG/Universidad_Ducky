@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libreria de la universidad Ducky</title>
+    <style>
+        :root {
+            --nav-gold: #B57900;
+            --button-blue: #00528C;
+            --text-dark: #111111;
+            --muted-text: #9aa3b2;
+            --panel-shadow: 0 26px 70px rgba(0, 0, 0, 0.18);
+            --page-glow: radial-gradient(circle at center, rgba(241, 243, 246, 0.96) 0%, rgba(255, 255, 255, 1) 68%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text-dark);
+            background: #ffffff;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-shell {
+            min-height: calc(100vh - 120px);
+            padding: 58px 24px 72px;
+            background: var(--page-glow);
+        }
+
+        .hero {
+            max-width: 880px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero h1 {
+            margin: 0 0 38px;
+            font-size: clamp(2.8rem, 5vw, 4.1rem);
+            font-weight: 700;
+            line-height: 1.08;
+        }
+
+        .login-card {
+            width: min(100%, 600px);
+            margin: 0 auto;
+            padding: 38px 40px 40px;
+            border: 1.5px solid #101010;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: var(--panel-shadow);
+            text-align: left;
+        }
+
+        .login-card h2 {
+            margin: 0 0 38px;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .field-group {
+            margin-bottom: 22px;
+        }
+
+        .field-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .field-group input {
+            width: 100%;
+            height: 48px;
+            padding: 0 14px;
+            border: 1.5px solid #d7dce4;
+            border-radius: 14px;
+            font-size: 1rem;
+            color: var(--text-dark);
+            background: #f8fafc;
+            outline: none;
+        }
+
+        .field-group input::placeholder {
+            color: var(--muted-text);
+        }
+
+        .field-group input:focus {
+            border-color: var(--button-blue);
+            background: #ffffff;
+        }
+
+        .forgot-password {
+            display: inline-block;
+            margin: 2px 0 40px;
+            color: #a0a8b5;
+            font-size: 0.96rem;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+        }
+
+        .login-button {
+            min-width: 180px;
+            height: 54px;
+            padding: 0 32px;
+            border: none;
+            border-radius: 12px;
+            background: var(--button-blue);
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 12px 26px rgba(0, 82, 140, 0.25);
+        }
+
+        @media (max-width: 640px) {
+            .page-shell {
+                padding: 36px 16px 48px;
+            }
+
+            .hero h1 {
+                margin-bottom: 28px;
+                font-size: 2.5rem;
+            }
+
+            .login-card {
+                padding: 28px 22px 30px;
+                border-radius: 18px;
+            }
+
+            .login-card h2 {
+                margin-bottom: 28px;
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar_user :: navbar}"></div>
+
+    <main class="page-shell">
+        <section class="hero">
+            <h1>Libreria de la universidad<br>Ducky</h1>
+
+            <div class="login-card">
+                <h2>Iniciar sesi&oacute;n</h2>
+
+                <form action="#" method="post">
+                    <div class="field-group">
+                        <label for="username">Usuario (Matr&iacute;cula/N&oacute;mina)</label>
+                        <input id="username" name="username" type="text" placeholder="Ingresa la informaci&oacute;n">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="password">Contrase&ntilde;a</label>
+                        <input id="password" name="password" type="password" placeholder="Ingresa la informaci&oacute;n">
+                    </div>
+
+                    <a class="forgot-password" href="#">&#191;Olvidaste tu contrase&ntilde;a?</a>
+
+                    <div class="actions">
+                        <button class="login-button" type="submit">Iniciar sesi&oacute;n</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
