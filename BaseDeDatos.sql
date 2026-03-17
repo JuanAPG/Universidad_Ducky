@@ -16,6 +16,7 @@ CREATE TABLE usuario (
     id_usuario      INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nombre          VARCHAR(100) NOT NULL,
     apellidos       VARCHAR(150) NOT NULL,
+    tipo       VARCHAR(50) NOT NULL,
     direccion       VARCHAR(200)
 );
 
@@ -133,6 +134,35 @@ CREATE TABLE multa (
         REFERENCES prestamo(id_prestamo)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
+);
+
+-- =========================================
+-- TABLA: Permisos
+-- =========================================
+CREATE TABLE permiso (
+    id_permiso INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    descripcion VARCHAR(200)
+);
+
+INSERT INTO permiso (nombre, descripcion) VALUES
+('gestionar_usuarios', 'Permite crear, editar o eliminar usuarios'),
+('gestionar_libros', 'Permite crear, editar o eliminar libros'),
+('buscar_libros', 'Permite consultar libros'),
+('prestar_libros', 'Permite registrar prestamos'),
+('devolver_libros', 'Permite registrar devoluciones');
+
+
+-- =========================================
+-- TABLA: Usuario_permiso
+-- =========================================
+CREATE TABLE usuario_permiso (
+    id_usuario INTEGER NOT NULL,
+    id_permiso INTEGER NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (id_usuario, id_permiso),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_permiso) REFERENCES permiso(id_permiso) ON DELETE CASCADE
 );
 
 -- =========================================

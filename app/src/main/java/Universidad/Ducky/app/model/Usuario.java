@@ -7,6 +7,7 @@ public class Usuario {
     private Long id;
     private String nombre;
     private String apellidos;
+    private String tipo;
     private String direccion;
     private List<Prestamo> prestamos = new ArrayList<>();
     private List<Multa> multas = new ArrayList<>();
@@ -14,10 +15,11 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(Long id, String nombre, String apellidos, String direccion) {
+    public Usuario(Long id, String nombre, String apellidos, String direccion, String tipo) {
         this.id = id;
         this.nombre = nombre;
         this.apellidos = apellidos;
+        this.tipo = tipo;
         this.direccion = direccion;
     }
 
