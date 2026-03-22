@@ -158,7 +158,10 @@
             <div class="login-card">
                 <h2>Iniciar sesi&oacute;n</h2>
 
-                <form action="#" method="post">
+                <p th:if="${error}" th:text="${error}"
+                   style="color:#c0392b; font-size:0.95rem; margin: -16px 0 20px;"></p>
+
+                <form th:action="@{/login}" method="post">
                     <div class="field-group">
                         <label for="username">Usuario (Matr&iacute;cula/N&oacute;mina)</label>
                         <input id="username" name="username" type="text" placeholder="Ingresa la informaci&oacute;n">

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio – Libreria Ducky</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #ffffff;
+            color: #111111;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ── Main content ── */
+        .page-shell {
+            padding: 48px 40px 72px;
+            max-width: 1100px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ── Title ── */
+        .page-title {
+            text-align: center;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 36px;
+        }
+
+        /* ── Search bar ── */
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .search-bar {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            border: 1.5px solid #d7dce4;
+            border-radius: 50px;
+            padding: 0 18px;
+            height: 52px;
+            background: #f8fafc;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            outline: none;
+            color: #111;
+        }
+
+        .search-bar input::placeholder { color: #9aa3b2; }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #555;
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            padding: 0;
+        }
+
+        .filter-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 1.5px solid #d7dce4;
+            background: #f8fafc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            flex-shrink: 0;
+        }
+
+        /* ── Category pills ── */
+        .categories {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 44px;
+            justify-content: center;
+        }
+
+        .pill {
+            padding: 8px 22px;
+            border: 1.5px solid #d7dce4;
+            border-radius: 50px;
+            font-size: 0.92rem;
+            background: #fff;
+            cursor: pointer;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .pill:hover { background: #f0f0f0; }
+
+        /* ── Section title ── */
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        /* ── Book cards grid ── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        @media (max-width: 800px) {
+            .cards-grid { grid-template-columns: repeat(2, 1fr); }
+            .page-shell { padding: 32px 20px 48px; }
+        }
+
+        @media (max-width: 520px) {
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            border: 1.5px solid #e2e6ed;
+            border-radius: 16px;
+            padding: 24px 22px 20px;
+            background: #fff;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .card-autor {
+            font-size: 0.88rem;
+            color: #555;
+        }
+
+        .card-stars {
+            color: #f5a623;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .card-rating-text {
+            font-size: 0.82rem;
+            color: #777;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+
+        .btn-detalle {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #C8941A;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-detalle:hover { background: #b07d10; }
+
+        .estado-badge {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .estado-disponible  { color: #1e8c45; }
+        .estado-prestado    { color: #c0392b; }
+        .estado-mantenimiento { color: #b57900; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar_user :: navbar}"></div>
+
+    <main class="page-shell">
+        <h1 class="page-title">Libreria de la universidad<br>Ducky</h1>
+
+        <!-- Search bar -->
+        <div class="search-row">
+            <div class="search-bar">
+                <button class="icon-btn" type="button" aria-label="Menú">&#9776;</button>
+                <input type="text" placeholder="Buscar libro, autor, categoría...">
+                <button class="icon-btn" type="button" aria-label="Buscar">&#128269;</button>
+            </div>
+            <button class="filter-btn" type="button" aria-label="Filtros">&#8801;</button>
+        </div>
+
+        <!-- Category pills -->
+        <div class="categories">
+            <span class="pill">Tecnolog&iacute;a</span>
+            <span class="pill">Ciencia</span>
+            <span class="pill">Historia</span>
+            <span class="pill">Literatura</span>
+            <span class="pill">Matem&aacute;ticas</span>
+            <span class="pill">Negocios</span>
+        </div>
+
+        <!-- Libros Sugeridos -->
+        <h2 class="section-title">Libros Sugeridos</h2>
+
+        <div class="cards-grid">
+            <div class="card" th:each="libro : ${libros}">
+                <div class="card-title" th:text="${libro.nombre}">Título del libro</div>
+                <div class="card-autor">Autor: <span th:text="${libro.autorNombre ?: 'Desconocido'}">Autor</span></div>
+                <div class="card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <div class="card-rating-text">5 | 53 rese&ntilde;as</div>
+                <div class="card-footer">
+                    <button class="btn-detalle" type="button">Ver detalles</button>
+                    <span th:switch="${libro.estado}">
+                        <span th:case="'disponible'"  class="estado-badge estado-disponible">Disponible</span>
+                        <span th:case="'prestado'"    class="estado-badge estado-prestado">En pr&eacute;stamo</span>
+                        <span th:case="'mantenimiento'" class="estado-badge estado-mantenimiento">Mantenimiento</span>
+                        <span th:case="*"             class="estado-badge estado-disponible">Disponible</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

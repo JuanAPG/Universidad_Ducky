@@ -50,6 +50,11 @@ CREATE TABLE libro (
     nombre          VARCHAR(200) NOT NULL,
     tipo            VARCHAR(100),
     anio            INTEGER,
+    isbn            VARCHAR(20),
+    sinopsis        TEXT,
+    num_paginas     INTEGER,
+    precio          NUMERIC(10,2),
+    num_copias      INTEGER DEFAULT 0,
     id_editorial    INTEGER NOT NULL,
     CONSTRAINT fk_libro_editorial
         FOREIGN KEY (id_editorial)
@@ -84,9 +89,10 @@ CREATE TABLE libroautor (
 -- TABLA: Copia
 -- =========================================
 CREATE TABLE copia (
-    id_copia     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    estado       VARCHAR(50) NOT NULL,
-    id_libro     INTEGER NOT NULL,
+    id_copia                INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    estado                  VARCHAR(50) NOT NULL,
+    ubicacion_biblioteca    VARCHAR(100),
+    id_libro                INTEGER NOT NULL,
     CONSTRAINT fk_copia_libro
         FOREIGN KEY (id_libro)
         REFERENCES libro(id_libro)
@@ -334,6 +340,31 @@ INSERT INTO copia (estado, id_libro)
 SELECT 'disponible', id_libro
 FROM libro
 WHERE id_libro <= 20;
+
+-- =========================================
+-- DATOS GENÉRICOS: Campos nuevos de libro
+-- =========================================
+UPDATE libro SET
+    isbn         = 'ISBN-978-' || LPAD(id_libro::TEXT, 2, '0') || '-'
+                   || LPAD((COALESCE(anio, 2000) % 100)::TEXT, 2, '0') || '-001',
+    sinopsis     = 'Este libro aborda temas relacionados con ' || tipo
+                   || '. Una obra esencial para quienes desean profundizar en la materia y ampliar sus conocimientos.',
+    num_paginas  = 120 + ((id_libro * 17) % 380),
+    precio       = ROUND(((50 + (id_libro * 13) % 450))::NUMERIC, 2);
+
+-- num_copias refleja el conteo real de copias insertadas
+UPDATE libro SET num_copias = (
+    SELECT COUNT(*) FROM copia WHERE copia.id_libro = libro.id_libro
+);
+
+-- =========================================
+-- DATOS GENÉRICOS: Ubicación de cada copia
+-- =========================================
+UPDATE copia SET
+    ubicacion_biblioteca = 'Estante '
+        || CHR(64 + ((id_copia - 1) % 8 + 1))
+        || '-'
+        || LPAD(((id_copia - 1) % 12 + 1)::TEXT, 2, '0');
 
 -- =========================================
 -- DATOS INICIALES: Usuarios demo

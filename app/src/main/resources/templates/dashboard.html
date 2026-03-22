@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard – Libreria Ducky</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f4f7;
+            color: #111;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Main column ── */
+        .main-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        /* ── Top search bar ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: #fff;
+            border-bottom: 1px solid #e2e6ed;
+        }
+
+        .topbar-search {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            border: 1.5px solid #d7dce4;
+            border-radius: 50px;
+            padding: 0 16px;
+            height: 44px;
+            background: #f8fafc;
+            gap: 10px;
+        }
+
+        .topbar-search input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            outline: none;
+            color: #111;
+        }
+
+        .topbar-search input::placeholder { color: #9aa3b2; }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #555;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1.5px solid #d7dce4;
+            background: #f8fafc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #555;
+            flex-shrink: 0;
+        }
+
+        /* ── Content area ── */
+        .content {
+            flex: 1;
+            padding: 32px;
+        }
+
+        /* ── Header row ── */
+        .content-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .content-header-left h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .content-header-left p {
+            margin-top: 6px;
+            font-size: 0.88rem;
+            color: #666;
+        }
+
+        .content-header-right {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #00528C;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover { background: #003f6b; }
+
+        /* ── Table ── */
+        .table-wrapper {
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        thead tr {
+            background: #00528C;
+            color: #fff;
+        }
+
+        thead th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+
+        tbody tr:hover { background: #f8fafc; }
+
+        tbody td {
+            padding: 13px 16px;
+            vertical-align: middle;
+        }
+
+        /* ── Genre pill ── */
+        .genre-pill {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .genre-Tecnologia      { background: #e3f0ff; color: #1a5fa8; }
+        .genre-Ciencia         { background: #e6f9f0; color: #1a7a44; }
+        .genre-Historia        { background: #fff4e0; color: #9a5c00; }
+        .genre-Literatura      { background: #f5e6ff; color: #6b21a8; }
+        .genre-Matematicas     { background: #fce7f3; color: #9d174d; }
+        .genre-Negocios        { background: #e0f2fe; color: #0369a1; }
+        .genre-Administracion  { background: #f0fdf4; color: #15803d; }
+        .genre-Economia        { background: #fefce8; color: #854d0e; }
+        .genre-Educacion       { background: #f0f9ff; color: #0c4a6e; }
+        .genre-Ensayo          { background: #faf5ff; color: #6d28d9; }
+        .genre-Derecho         { background: #fff1f2; color: #9f1239; }
+        .genre-Arte            { background: #fff7ed; color: #c2410c; }
+        .genre-Arquitectura    { background: #f7f7f7; color: #374151; }
+        .genre-Ingenieria      { background: #ecfdf5; color: #065f46; }
+        .genre-default         { background: #f3f4f6; color: #374151; }
+
+        /* ── Action buttons ── */
+        .actions-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-detail {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            background: #00528C;
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-detail:hover { background: #003f6b; }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+        }
+
+        .btn-edit   { background: #00528C; color: #fff; }
+        .btn-delete { background: #e53e3e; color: #fff; }
+
+        .btn-edit:hover   { background: #003f6b; }
+        .btn-delete:hover { background: #c53030; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/navbar_admin :: sidebar(usuario=${usuario})}"></div>
+
+    <!-- Main column -->
+    <div class="main-col">
+
+        <!-- Top search bar -->
+        <div class="topbar">
+            <div class="topbar-search">
+                <button class="icon-btn" type="button" aria-label="Menú">&#9776;</button>
+                <input type="text" placeholder="Consulta libros">
+                <button class="icon-btn" type="button" aria-label="Buscar">&#128269;</button>
+            </div>
+            <button class="filter-btn" type="button" aria-label="Filtros">&#8801;</button>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="content-header">
+                <div class="content-header-left">
+                    <h1>Libros</h1>
+                    <p>Pesta&ntilde;a para administrar los libros que se encuentran en el sistema</p>
+                </div>
+                <div class="content-header-right">
+                    <a class="btn-primary" href="/libros/nuevo" style="text-decoration:none; text-align:center;">Nuevo Libro +</a>
+                    <button class="btn-primary" type="button">Imprimir Lista</button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>T&iacute;tulo</th>
+                            <th>Autor(es)</th>
+                            <th>A&ntilde;o</th>
+                            <th>G&eacute;nero</th>
+                            <th>Copias</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="libro : ${libros}">
+                            <td th:text="'L-' + ${libro.id}">L-1</td>
+                            <td th:text="${libro.nombre}">Título</td>
+                            <td th:text="${libro.autores}">Autor</td>
+                            <td th:text="${libro.anio}">2021</td>
+                            <td>
+                                <span th:with="cls=${'genre-' + #strings.replace(libro.tipo,' ','')}"
+                                      th:class="${'genre-pill ' + (cls != null ? cls : 'genre-default')}"
+                                      th:text="${libro.tipo}">Género</span>
+                            </td>
+                            <td th:text="${libro.numCopias}">0</td>
+                            <td>
+                                <div class="actions-cell">
+                                    <button class="btn-detail" type="button">Ver detalles</button>
+                                    <a th:href="@{/libros/editar/{id}(id=${libro.id})}"
+                                       class="btn-icon btn-edit" title="Editar"
+                                       style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">&#9998;</a>
+                                    <button class="btn-icon btn-delete" type="button" title="Eliminar">&#128465;</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
