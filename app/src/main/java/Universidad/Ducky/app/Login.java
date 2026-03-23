@@ -37,8 +37,8 @@ public class Login {
 
         return switch (usuario.getTipo()) {
             case "usuario" -> "redirect:/home";
-            case "bibliotecario" -> "redirect:/bibliotecario";
-            case "admin" -> "redirect:/dashboard";
+            case "bibliotecario" -> "redirect:/dashboard";
+            case "admin" -> "redirect:/bibliotecario";
             default -> "redirect:/";
         };
     }

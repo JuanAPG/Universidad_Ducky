@@ -206,14 +206,14 @@
         <h1 class="page-title">Libreria de la universidad<br>Ducky</h1>
 
         <!-- Search bar -->
-        <div class="search-row">
+        <form class="search-row" method="get" action="/home">
             <div class="search-bar">
                 <button class="icon-btn" type="button" aria-label="Menú">&#9776;</button>
-                <input type="text" placeholder="Buscar libro, autor, categoría...">
-                <button class="icon-btn" type="button" aria-label="Buscar">&#128269;</button>
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar libro por título...">
+                <button class="icon-btn" type="submit" aria-label="Buscar">&#128269;</button>
             </div>
             <button class="filter-btn" type="button" aria-label="Filtros">&#8801;</button>
-        </div>
+        </form>
 
         <!-- Category pills -->
         <div class="categories">
@@ -226,7 +226,7 @@
         </div>
 
         <!-- Libros Sugeridos -->
-        <h2 class="section-title">Libros Sugeridos</h2>
+        <h2 class="section-title" th:text="${q != null and !#strings.isEmpty(q)} ? 'Resultados para: ' + ${q} : 'Libros Sugeridos'">Libros Sugeridos</h2>
 
         <div class="cards-grid">
             <div class="card" th:each="libro : ${libros}">

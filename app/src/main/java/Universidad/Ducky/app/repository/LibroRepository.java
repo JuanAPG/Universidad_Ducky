@@ -117,6 +117,59 @@ public class LibroRepository {
         }
     }
 
+    public List<LibroAdmin> searchByTituloForAdmin(String titulo) {
+        String sql = """
+                SELECT l.id_libro,
+                       l.nombre,
+                       l.anio,
+                       l.tipo,
+                       COALESCE(string_agg(DISTINCT a.nombre, ', '), 'Sin autor') AS autores,
+                       COUNT(DISTINCT c.id_copia) AS num_copias
+                FROM libro l
+                LEFT JOIN libroautor la ON l.id_libro = la.id_libro
+                LEFT JOIN autor a ON la.id_autor = a.id_autor
+                LEFT JOIN copia c ON c.id_libro = l.id_libro
+                WHERE LOWER(l.nombre) LIKE LOWER(CONCAT('%', ?, '%'))
+                GROUP BY l.id_libro, l.nombre, l.anio, l.tipo
+                ORDER BY l.id_libro
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new LibroAdmin(
+                rs.getInt("id_libro"),
+                rs.getString("nombre"),
+                rs.getString("autores"),
+                rs.getInt("anio"),
+                rs.getString("tipo"),
+                rs.getInt("num_copias")
+        ), titulo);
+    }
+
+    public List<LibroCard> searchByTituloForCards(String titulo) {
+        String sql = """
+                SELECT l.id_libro,
+                       l.nombre,
+                       l.tipo,
+                       (SELECT a.nombre
+                        FROM libroautor la
+                        JOIN autor a ON la.id_autor = a.id_autor
+                        WHERE la.id_libro = l.id_libro
+                        LIMIT 1) AS autor_nombre,
+                       (SELECT c.estado
+                        FROM copia c
+                        WHERE c.id_libro = l.id_libro
+                        LIMIT 1) AS estado
+                FROM libro l
+                WHERE LOWER(l.nombre) LIKE LOWER(CONCAT('%', ?, '%'))
+                ORDER BY l.nombre
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new LibroCard(
+                rs.getInt("id_libro"),
+                rs.getString("nombre"),
+                rs.getString("tipo"),
+                rs.getString("autor_nombre"),
+                rs.getString("estado")
+        ), titulo);
+    }
+
     public List<LibroCard> findRandom(int cantidad) {
         String sql = """
                 SELECT l.id_libro,

@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class HomeController {
@@ -17,13 +18,19 @@ public class HomeController {
     }
 
     @GetMapping("/home")
-    public String home(HttpSession session, Model model) {
+    public String home(HttpSession session, Model model,
+                       @RequestParam(required = false) String q) {
         Usuario usuario = (Usuario) session.getAttribute("usuarioSesion");
         if (usuario == null || !"usuario".equals(usuario.getTipo())) {
             return "redirect:/";
         }
         model.addAttribute("usuario", usuario);
-        model.addAttribute("libros", libroRepository.findRandom(6));
+        model.addAttribute("q", q);
+        if (q != null && !q.isBlank()) {
+            model.addAttribute("libros", libroRepository.searchByTituloForCards(q));
+        } else {
+            model.addAttribute("libros", libroRepository.findRandom(6));
+        }
         return "home";
     }
 }

@@ -242,14 +242,14 @@
     <div class="main-col">
 
         <!-- Top search bar -->
-        <div class="topbar">
+        <form class="topbar" method="get" action="/dashboard">
             <div class="topbar-search">
                 <button class="icon-btn" type="button" aria-label="Menú">&#9776;</button>
-                <input type="text" placeholder="Consulta libros">
-                <button class="icon-btn" type="button" aria-label="Buscar">&#128269;</button>
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar libro por título...">
+                <button class="icon-btn" type="submit" aria-label="Buscar">&#128269;</button>
             </div>
             <button class="filter-btn" type="button" aria-label="Filtros">&#8801;</button>
-        </div>
+        </form>
 
         <!-- Content -->
         <div class="content">
