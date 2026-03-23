@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f4f7;
+            color: #111;
+            display: flex;
+            min-height: 100vh;
+        }
+        .main-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .content { flex: 1; padding: 28px; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+        .title { font-size: 1.8rem; font-weight: 700; }
+        .subtitle { color: #606d80; margin-top: 6px; font-size: 0.9rem; }
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .btn-primary { background: #00528C; color: #fff; text-decoration: none; }
+        .btn-primary:hover { background: #003f6b; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            padding: 16px;
+        }
+        .card h2 { font-size: 1rem; margin-bottom: 14px; color: #1e293b; }
+        .field { display: flex; flex-direction: column; margin-bottom: 10px; }
+        .field label { font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #344054; }
+        .field input {
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            height: 38px;
+            padding: 0 10px;
+            outline: none;
+        }
+        .field select {
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            height: 38px;
+            padding: 0 10px;
+            outline: none;
+            background: #fff;
+        }
+        .field input:focus { border-color: #00528C; }
+        .field select:focus { border-color: #00528C; }
+        .row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: #e6f0fa;
+            color: #0b4b7d;
+        }
+        .msg-ok, .msg-error {
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+        }
+        .msg-ok { background: #ecfdf3; color: #067647; border: 1px solid #abefc6; }
+        .msg-error { background: #fef3f2; color: #b42318; border: 1px solid #fecdca; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; }
+        thead tr { background: #00528C; color: #fff; }
+        th, td { padding: 12px 14px; text-align: left; font-size: 0.85rem; border-bottom: 1px solid #eef2f7; vertical-align: middle; }
+        tbody tr:last-child td { border-bottom: none; }
+        .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .small-input {
+            width: 150px;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            height: 34px;
+            padding: 0 8px;
+        }
+        .btn-danger { background: #dc2626; color: #fff; }
+        .btn-danger:hover { background: #b91c1c; }
+        .loan-yes { background: #fff1f2; color: #9f1239; }
+        .loan-no { background: #ecfdf3; color: #067647; }
+        .btn-disabled { background: #9ca3af; color: #fff; cursor: not-allowed; }
+        .hidden { display: none; }
+        .section-title { margin: 12px 0 10px; font-size: 0.88rem; color: #334155; font-weight: 700; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar_admin :: sidebar(usuario=${usuario})}"></div>
+
+<div class="main-col">
+    <div class="content">
+        <div class="header">
+            <div>
+                <div class="title">Gestión de usuarios</div>
+                <div class="subtitle">Validar alumnos, crear personal, actualizar contraseña y dar de baja</div>
+            </div>
+            <a href="/dashboard" class="btn btn-primary">Volver al dashboard</a>
+        </div>
+
+        <div th:if="${param.okAccesoCreado}" class="msg-ok">Acceso del alumno creado correctamente.</div>
+        <div th:if="${param.okPersonalCreado}" class="msg-ok">Cuenta de personal creada correctamente.</div>
+        <div th:if="${param.okContrasenaActualizada}" class="msg-ok">Contraseña actualizada correctamente.</div>
+        <div th:if="${param.okBaja}" class="msg-ok">Usuario dado de baja correctamente.</div>
+        <div th:if="${param.errorAlumnoNoExiste}" class="msg-error">No existe el alumno indicado.</div>
+        <div th:if="${param.errorCrearPersonal}" class="msg-error">No se pudo crear la cuenta de personal. Revisa que el usuario no esté repetido.</div>
+        <div th:if="${param.errorTipoPersonal}" class="msg-error">Tipo de cuenta inválido. Solo se permite admin o bibliotecario.</div>
+        <div th:if="${param.errorActualizarContrasena}" class="msg-error">No se pudo actualizar la contraseña.</div>
+        <div th:if="${param.errorAutoBaja}" class="msg-error">No puedes darte de baja a ti mismo.</div>
+        <div th:if="${param.errorPrestamoActivo}" class="msg-error">No se puede dar de baja porque el usuario tiene préstamo activo.</div>
+        <div th:if="${param.errorBaja}" class="msg-error">No se pudo dar de baja. Puede tener préstamos o multas relacionados.</div>
+        <div th:if="${error}" class="msg-error" th:text="${error}">Error</div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Dar de alta usuario</h2>
+                <div class="field">
+                    <label for="tipoAlta">Tipo de alta</label>
+                    <select id="tipoAlta" onchange="cambiarTipoAlta()">
+                        <option value="usuario">Usuario (alumno)</option>
+                        <option value="bibliotecario">Bibliotecario</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+
+                <div id="altaUsuarioBlock">
+                    <div class="section-title">Paso 1: validar ID del alumno</div>
+                    <form th:action="@{/admin/usuarios/validar}" method="post">
+                        <div class="field">
+                            <label for="idAlumno">ID de alumno</label>
+                            <input id="idAlumno" name="idAlumno" type="number" min="1" required
+                                   th:value="${idAlumnoIngresado}">
+                        </div>
+                        <button class="btn btn-primary" type="submit">Validar ID</button>
+                    </form>
+
+                    <div class="section-title">Paso 2: crear acceso</div>
+                    <div th:if="${alumnoValidado}">
+                        <p><strong>Nombre:</strong> <span th:text="${alumnoValidado.nombre + ' ' + alumnoValidado.apellidos}"></span></p>
+                        <p style="margin-top:6px;"><strong>ID:</strong> <span th:text="${alumnoValidado.id}"></span></p>
+                        <span class="badge" style="margin-top:8px;">ID validado</span>
+                    </div>
+                    <div th:unless="${alumnoValidado}">
+                        <p>Valida un ID para habilitar creación de acceso de alumno.</p>
+                    </div>
+
+                    <form th:if="${alumnoValidado}" th:action="@{/admin/usuarios/crear-acceso}" method="post" style="margin-top:12px;">
+                        <input type="hidden" name="idAlumno" th:value="${alumnoValidado.id}">
+                        <div class="field">
+                            <label for="contrasena">Contraseña</label>
+                            <input id="contrasena" name="contrasena" type="password" minlength="3" required>
+                        </div>
+                        <button class="btn btn-primary" type="submit">Crear usuario</button>
+                    </form>
+                </div>
+
+                <div id="altaPersonalBlock" class="hidden">
+                    <div class="section-title">Datos de la cuenta</div>
+                    <form th:action="@{/admin/usuarios/crear-personal}" method="post">
+                        <input type="hidden" id="tipoPersonalHidden" name="tipo" value="bibliotecario">
+                        <div class="field">
+                            <label for="usernamePersonal">Usuario / nómina</label>
+                            <input id="usernamePersonal" name="username" type="text" required>
+                        </div>
+                        <div class="field">
+                            <label for="nombrePersonal">Nombre</label>
+                            <input id="nombrePersonal" name="nombre" type="text" required>
+                        </div>
+                        <div class="field">
+                            <label for="apellidosPersonal">Apellidos</label>
+                            <input id="apellidosPersonal" name="apellidos" type="text" required>
+                        </div>
+                        <div class="field">
+                            <label for="direccionPersonal">Dirección (opcional)</label>
+                            <input id="direccionPersonal" name="direccion" type="text">
+                        </div>
+                        <div class="field">
+                            <label for="contrasenaPersonal">Contraseña</label>
+                            <input id="contrasenaPersonal" name="contrasena" type="password" minlength="3" required>
+                        </div>
+                        <button class="btn btn-primary" type="submit">Crear cuenta</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Usuarios registrados</h2>
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Préstamo activo</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="u : ${usuarios}">
+                    <td th:text="${u.id}">1</td>
+                    <td th:text="${u.username}">usuario</td>
+                    <td th:text="${u.nombre + ' ' + u.apellidos}">Nombre</td>
+                    <td><span class="badge" th:text="${u.tipo}">tipo</span></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${u.prestamoActivo} ? ' loan-yes' : ' loan-no'"
+                              th:text="${u.prestamoActivo} ? 'Sí' : 'No'">No</span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <form th:action="@{/admin/usuarios/cambiar-contrasena}" method="post" class="row">
+                                <input type="hidden" name="idUsuario" th:value="${u.id}">
+                                <input class="small-input" name="nuevaContrasena" type="password" minlength="3" placeholder="Nueva contraseña" required>
+                                <button class="btn btn-primary" type="submit">Guardar</button>
+                            </form>
+                            <form th:action="@{/admin/usuarios/dar-baja}" method="post"
+                                  onsubmit="return confirm('¿Seguro que deseas dar de baja a este usuario?');">
+                                <input type="hidden" name="idUsuario" th:value="${u.id}">
+                                <button class="btn btn-danger"
+                                        th:classappend="${u.prestamoActivo} ? ' btn-disabled' : ''"
+                                        th:disabled="${u.prestamoActivo}"
+                                        th:title="${u.prestamoActivo} ? 'No se puede dar de baja: préstamo activo' : 'Dar de baja'"
+                                        type="submit">Dar de baja</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    function cambiarTipoAlta() {
+        const tipo = document.getElementById("tipoAlta").value;
+        const usuarioBlock = document.getElementById("altaUsuarioBlock");
+        const personalBlock = document.getElementById("altaPersonalBlock");
+        const tipoHidden = document.getElementById("tipoPersonalHidden");
+
+        if (tipo === "usuario") {
+            usuarioBlock.classList.remove("hidden");
+            personalBlock.classList.add("hidden");
+        } else {
+            usuarioBlock.classList.add("hidden");
+            personalBlock.classList.remove("hidden");
+            tipoHidden.value = tipo;
+        }
+    }
+
+    cambiarTipoAlta();
+</script>
+</body>
+</html>

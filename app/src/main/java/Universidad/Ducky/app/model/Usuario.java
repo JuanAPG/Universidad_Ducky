@@ -13,6 +13,7 @@ public class Usuario {
     private String apellidos;
     private String tipo;
     private String direccion;
+    private boolean prestamoActivo;
     private List<Prestamo> prestamos = new ArrayList<>();
     private List<Multa> multas = new ArrayList<>();
     private Set<UsuarioPermiso> permisos = new HashSet<>();
@@ -84,6 +85,14 @@ public class Usuario {
 
     public void setDireccion(String direccion) {
         this.direccion = direccion;
+    }
+
+    public boolean isPrestamoActivo() {
+        return prestamoActivo;
+    }
+
+    public void setPrestamoActivo(boolean prestamoActivo) {
+        this.prestamoActivo = prestamoActivo;
     }
 
     public List<Prestamo> getPrestamos() {

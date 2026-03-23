@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Bibliotecario</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, Helvetica, sans-serif; background: #f3f5f8; color: #111; display: flex; min-height: 100vh; }
+        .main { flex: 1; padding: 28px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .title { font-size: 1.8rem; font-weight: 700; }
+        .subtitle { color: #667085; margin-top: 6px; }
+        .card { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: #00528C; color: #fff; }
+        th, td { padding: 12px 14px; font-size: 0.86rem; text-align: left; border-bottom: 1px solid #edf1f7; }
+        tbody tr:last-child td { border-bottom: none; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; background: #e6f0fa; color: #0b4b7d; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar_admin :: sidebar(usuario=${usuario})}"></div>
+
+<main class="main">
+    <div class="header">
+        <div>
+            <div class="title">Panel de bibliotecario</div>
+            <div class="subtitle">Consulta rápida del catálogo y estado general de libros</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Autor(es)</th>
+                <th>Año</th>
+                <th>Tipo</th>
+                <th>Copias</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="libro : ${libros}">
+                <td th:text="'L-' + ${libro.id}">L-1</td>
+                <td th:text="${libro.nombre}">Título</td>
+                <td th:text="${libro.autores}">Autor</td>
+                <td th:text="${libro.anio}">2020</td>
+                <td><span class="badge" th:text="${libro.tipo}">Tipo</span></td>
+                <td th:text="${libro.numCopias}">0</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>
