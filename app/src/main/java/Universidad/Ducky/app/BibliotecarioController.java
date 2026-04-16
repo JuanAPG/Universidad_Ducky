@@ -17,7 +17,7 @@ public class BibliotecarioController {
         this.libroRepository = libroRepository;
     }
 
-    @GetMapping("/dashboard")
+    @GetMapping("/libros")
     public String dashboard(HttpSession session, Model model,
                             @RequestParam(required = false) String q) {
         Usuario usuario = (Usuario) session.getAttribute("usuarioSesion");
@@ -31,6 +31,6 @@ public class BibliotecarioController {
         } else {
             model.addAttribute("libros", libroRepository.findAllForAdmin());
         }
-        return "dashboard";
+        return "libros";
     }
 }

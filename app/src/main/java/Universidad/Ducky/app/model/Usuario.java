@@ -86,6 +86,14 @@ public class Usuario {
         this.direccion = direccion;
     }
 
+    public String getCorreo() {
+        return direccion;
+    }
+
+    public void setCorreo(String correo) {
+        this.direccion = correo;
+    }
+
     public List<Prestamo> getPrestamos() {
         return prestamos;
     }

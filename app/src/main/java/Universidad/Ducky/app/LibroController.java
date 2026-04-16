@@ -41,7 +41,7 @@ public class LibroController {
 
     private Usuario getAdminOrRedirect(HttpSession session) {
         Usuario u = (Usuario) session.getAttribute("usuarioSesion");
-        return (u != null && "admin".equals(u.getTipo())) ? u : null;
+        return (u != null && ("admin".equals(u.getTipo()) || "bibliotecario".equals(u.getTipo()))) ? u : null;
     }
 
     // ── Nuevo libro ──────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ public class LibroController {
 
         libroRepository.insert(nombre, tipo, anio, idEditorial,
                 isbn, sinopsis, numPaginas, precio, numCopias, ubicacionBiblioteca, autorIds);
-        return "redirect:/dashboard";
+        return "redirect:/libros";
     }
 
     // ── Editar libro ─────────────────────────────────────────────────────────
@@ -110,6 +110,6 @@ public class LibroController {
 
         libroRepository.update(id, nombre, tipo, anio, idEditorial,
                 isbn, sinopsis, numPaginas, precio, autorIds);
-        return "redirect:/dashboard";
+        return "redirect:/libros";
     }
 }

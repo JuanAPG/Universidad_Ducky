@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios – Libreria Ducky</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { height: 100%; overflow: hidden; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f4f7;
+            color: #111;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow-y: auto;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: #fff;
+            border-bottom: 1px solid #e2e6ed;
+        }
+
+        .topbar-search {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            border: 1.5px solid #d7dce4;
+            border-radius: 50px;
+            padding: 0 16px;
+            height: 44px;
+            background: #f8fafc;
+            gap: 10px;
+        }
+
+        .topbar-search input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            outline: none;
+            color: #111;
+        }
+
+        .topbar-search input::placeholder { color: #9aa3b2; }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #555;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1.5px solid #d7dce4;
+            background: #f8fafc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #555;
+            flex-shrink: 0;
+        }
+
+        .content {
+            flex: 1;
+            padding: 32px;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .content-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .content-header-left h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .content-header-left p {
+            margin-top: 6px;
+            font-size: 0.88rem;
+            color: #666;
+        }
+
+        .content-header-right {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #00528C;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-primary:hover { background: #003f6b; }
+
+        .table-wrapper {
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        thead tr { background: #00528C; color: #fff; }
+
+        thead th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        tbody tr { border-bottom: 1px solid #f0f2f5; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #f8fafc; }
+
+        tbody td {
+            padding: 13px 16px;
+            vertical-align: middle;
+        }
+
+        .tipo-pill {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .tipo-admin        { background: #fff1f2; color: #9f1239; }
+        .tipo-bibliotecario { background: #e3f0ff; color: #1a5fa8; }
+        .tipo-usuario      { background: #e6f9f0; color: #1a7a44; }
+
+        .actions-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            text-decoration: none;
+        }
+
+        .btn-edit   { background: #00528C; color: #fff; }
+        .btn-delete { background: #e53e3e; color: #fff; }
+
+        .btn-edit:hover   { background: #003f6b; }
+        .btn-delete:hover { background: #c53030; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar_admin :: sidebar(usuario=${usuario})}"></div>
+
+    <div class="main-col">
+
+        <div class="topbar">
+            <div class="topbar-search">
+                <button class="icon-btn" type="button" aria-label="Men&uacute;">&#9776;</button>
+                <input type="text" placeholder="Buscar usuario...">
+                <button class="icon-btn" type="button" aria-label="Buscar">&#128269;</button>
+            </div>
+            <button class="filter-btn" type="button" aria-label="Filtros">&#8801;</button>
+        </div>
+
+        <div class="content">
+            <div class="content-header">
+                <div class="content-header-left">
+                    <h1>Usuarios</h1>
+                    <p>Administra los usuarios registrados en el sistema</p>
+                </div>
+                <div class="content-header-right">
+                    <a class="btn-primary" href="/usuarios/nuevo">Nuevo Usuario +</a>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Nombre</th>
+                            <th>Apellidos</th>
+                            <th>Tipo</th>
+                            <th>Correo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="u : ${usuarios}">
+                            <td th:text="${u['id_usuario']}">1</td>
+                            <td th:text="${u['username']}">username</td>
+                            <td th:text="${u['nombre']}">Nombre</td>
+                            <td th:text="${u['apellidos']}">Apellidos</td>
+                            <td>
+                                <span th:with="t=${u['tipo']}"
+                                      th:class="${'tipo-pill tipo-' + t}"
+                                      th:text="${t}">tipo</span>
+                            </td>
+                            <td th:text="${u['correo']}">Correo</td>
+                            <td>
+                                <div class="actions-cell">
+                                    <a class="btn-icon btn-edit"
+                                       th:href="@{/usuarios/editar/{id}(id=${u['id_usuario']})}"
+                                       title="Editar">&#9998;</a>
+                                    <button class="btn-icon btn-delete" type="button" title="Eliminar">&#128465;</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

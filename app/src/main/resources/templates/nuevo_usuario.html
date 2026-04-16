@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Usuario – Libreria Ducky</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { height: 100%; overflow: hidden; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f4f7;
+            color: #111;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow-y: auto;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: #fff;
+            border-bottom: 1px solid #e2e6ed;
+        }
+
+        .topbar-search {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            border: 1.5px solid #d7dce4;
+            border-radius: 50px;
+            padding: 0 16px;
+            height: 44px;
+            background: #f8fafc;
+            gap: 10px;
+        }
+
+        .topbar-search input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            outline: none;
+            color: #111;
+        }
+
+        .topbar-search input::placeholder { color: #9aa3b2; }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #555;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1.5px solid #d7dce4;
+            background: #f8fafc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #555;
+            flex-shrink: 0;
+        }
+
+        /* ── Content ── */
+        .content {
+            flex: 1;
+            padding: 32px;
+            width: 100%;
+            min-width: 0;
+        }
+
+        /* ── Form card ── */
+        .form-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 36px 40px 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            width: 100%;
+        }
+
+        .form-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .form-header h1 { font-size: 1.9rem; font-weight: 700; }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #00528C;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-back:hover { background: #003f6b; }
+
+        /* ── Fields ── */
+        .field-group { margin-bottom: 20px; }
+
+        .field-group label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #222;
+        }
+
+        .field-group input {
+            width: 100%;
+            height: 46px;
+            padding: 0 14px;
+            border: 1.5px solid #d7dce4;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #111;
+            background: #f8fafc;
+            outline: none;
+        }
+
+        .field-group input:focus {
+            border-color: #00528C;
+            background: #fff;
+        }
+
+        .field-group input::placeholder { color: #9aa3b2; }
+
+        /* ── 2-col row ── */
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* ── Search button ── */
+        .btn-search {
+            margin-top: 8px;
+            padding: 11px 22px;
+            border: none;
+            border-radius: 12px;
+            background: #00528C;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-search:hover { background: #003f6b; }
+
+        /* ── Section divider ── */
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin: 28px 0 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e6ed;
+        }
+
+        /* ── Radio rol ── */
+        .rol-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .rol-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: 1.5px solid #d7dce4;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #444;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .rol-option input[type="radio"] { display: none; }
+
+        .rol-option:has(input:checked) {
+            border-color: #00528C;
+            background: #e8f1fb;
+            color: #00528C;
+        }
+
+        /* ── Toggle permisos ── */
+        .permisos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .permiso-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e6ed;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .permiso-row span {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toggle input { display: none; }
+
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            border-radius: 50px;
+            background: #d7dce4;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toggle-track::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .toggle input:checked + .toggle-track { background: #00528C; }
+        .toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+
+        /* ── Search feedback ── */
+        .search-msg {
+            display: none;
+            margin-top: 10px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .search-msg.found {
+            background: #e6f4ea;
+            color: #1e6e36;
+            border: 1.5px solid #a8d5b5;
+        }
+
+        .search-msg.not-found {
+            background: #fdecea;
+            color: #b71c1c;
+            border: 1.5px solid #f5b8b5;
+        }
+
+        /* ── Save button ── */
+        .btn-save {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 12px;
+            background: #00528C;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-save:hover { background: #003f6b; }
+
+        @media (max-width: 640px) {
+            .row-2 { grid-template-columns: 1fr; }
+            .permisos-grid { grid-template-columns: 1fr; }
+            .form-card { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar_admin :: sidebar(usuario=${usuario})}"></div>
+
+    <div class="main-col">
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-search">
+                <button class="icon-btn" type="button">&#9776;</button>
+                <input type="text" placeholder="Buscar usuario...">
+                <button class="icon-btn" type="button">&#128269;</button>
+            </div>
+            <button class="filter-btn" type="button">&#8801;</button>
+        </div>
+
+        <div class="content">
+            <div class="form-card">
+                <div class="form-header">
+                    <h1 th:text="${modoEdicion} ? 'Editar Usuario' : 'Nuevo Usuario'">Nuevo Usuario</h1>
+                    <a class="btn-back" href="/usuarios">&#8592; Volver</a>
+                </div>
+
+                <form th:action="${modoEdicion} ? @{/usuarios/editar/{id}(id=${usuarioForm.id})} : @{/usuarios/nuevo}"
+                      method="post">
+
+                    <!-- ID -->
+                    <div class="field-group">
+                        <label for="username">ID (Matr&iacute;cula / N&oacute;mina)</label>
+                        <input id="username" name="username" type="text"
+                               th:value="${usuarioForm.username}"
+                               placeholder="Ej. 611380" required>
+                    </div>
+
+                    <!-- Buscar en BD (simulado con arreglos locales) -->
+                    <div style="margin: -4px 0 24px;">
+                        <button type="button" class="btn-search" onclick="buscarEnBD()">
+                            Buscar usuario en Base de datos
+                        </button>
+                        <div id="searchMsg" class="search-msg"></div>
+                    </div>
+
+                    <!-- Nombre completo -->
+                    <div class="row-2">
+                        <div class="field-group" style="margin-bottom:0;">
+                            <label for="nombre">Nombre</label>
+                            <input id="nombre" name="nombre" type="text"
+                                   th:value="${usuarioForm.nombre}"
+                                   placeholder="Nombre(s)" required>
+                        </div>
+                        <div class="field-group" style="margin-bottom:0;">
+                            <label for="apellidos">Apellidos</label>
+                            <input id="apellidos" name="apellidos" type="text"
+                                   th:value="${usuarioForm.apellidos}"
+                                   placeholder="Apellido(s)" required>
+                        </div>
+                    </div>
+
+                    <div class="field-group" style="margin-top:20px;">
+                        <label for="correo">Correo electr&oacute;nico</label>
+                        <input id="correo" name="correo" type="email"
+                               th:value="${usuarioForm.correo}"
+                               placeholder="ejemplo@correo.com">
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="field-group" style="margin-top:20px;">
+                        <label for="contrasena">Contrase&ntilde;a</label>
+                        <input id="contrasena" name="contrasena" type="password"
+                               th:value="${usuarioForm.contrasena}"
+                               placeholder="Ingresa la contrase&ntilde;a" required>
+                    </div>
+
+                    <!-- Rol -->
+                    <p class="section-label">Rol</p>
+                    <div class="rol-group">
+                        <label class="rol-option">
+                            <input type="radio" name="tipo" value="bibliotecario"
+                                   th:checked="${usuarioForm.tipo == 'bibliotecario'}" required>
+                            Bibliotecario
+                        </label>
+                        <label class="rol-option">
+                            <input type="radio" name="tipo" value="profesor"
+                                   th:checked="${usuarioForm.tipo == 'profesor'}">
+                            Profesor
+                        </label>
+                        <label class="rol-option">
+                            <input type="radio" name="tipo" value="usuario"
+                                   th:checked="${usuarioForm.tipo == 'usuario'}">
+                            Alumno
+                        </label>
+                        <label class="rol-option">
+                            <input type="radio" name="tipo" value="admin"
+                                   th:checked="${usuarioForm.tipo == 'admin'}">
+                            Administrador
+                        </label>
+                    </div>
+
+                    <!-- Permisos -->
+                    <p class="section-label">Permisos</p>
+                    <div class="permisos-grid">
+                        <div class="permiso-row">
+                            <span>Gestionar usuarios</span>
+                            <label class="toggle">
+                                <input type="checkbox" name="permisos" value="gestionar_usuarios"
+                                       th:checked="${permisosSeleccionados != null and permisosSeleccionados.contains('gestionar_usuarios')}">
+                                <span class="toggle-track"></span>
+                            </label>
+                        </div>
+                        <div class="permiso-row">
+                            <span>Gestionar libros</span>
+                            <label class="toggle">
+                                <input type="checkbox" name="permisos" value="gestionar_libros"
+                                       th:checked="${permisosSeleccionados != null and permisosSeleccionados.contains('gestionar_libros')}">
+                                <span class="toggle-track"></span>
+                            </label>
+                        </div>
+                        <div class="permiso-row">
+                            <span>Buscar libros</span>
+                            <label class="toggle">
+                                <input type="checkbox" name="permisos" value="buscar_libros"
+                                       th:checked="${permisosSeleccionados != null and permisosSeleccionados.contains('buscar_libros')}">
+                                <span class="toggle-track"></span>
+                            </label>
+                        </div>
+                        <div class="permiso-row">
+                            <span>Prestar libros</span>
+                            <label class="toggle">
+                                <input type="checkbox" name="permisos" value="prestar_libros"
+                                       th:checked="${permisosSeleccionados != null and permisosSeleccionados.contains('prestar_libros')}">
+                                <span class="toggle-track"></span>
+                            </label>
+                        </div>
+                        <div class="permiso-row">
+                            <span>Devolver libros</span>
+                            <label class="toggle">
+                                <input type="checkbox" name="permisos" value="devolver_libros"
+                                       th:checked="${permisosSeleccionados != null and permisosSeleccionados.contains('devolver_libros')}">
+                                <span class="toggle-track"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="btn-save" type="submit"
+                            th:text="${modoEdicion} ? 'Actualizar usuario' : 'Guardar usuario'">Guardar usuario</button>
+                </form>
+            </div>
+        </div>
+    </div>
+<script>
+    /* ── Datos simulados de la BD institucional ── */
+    const alumnos = [
+        { matricula: "611380",  nombre: "Juan Angel", apellidos: "Galván Navarro",      correo: "juan.galvann@udem.edu" },
+        { matricula: "620145",  nombre: "María",      apellidos: "Rodríguez Sánchez",   correo: "maria.rodriguez@udem.edu" },
+        { matricula: "634782",  nombre: "Carlos",     apellidos: "Martínez Pérez",      correo: "carlos.martinez@udem.edu" },
+        { matricula: "608931",  nombre: "Laura",      apellidos: "González Flores",     correo: "laura.gonzalez@udem.edu" },
+        { matricula: "645023",  nombre: "Pablo",      apellidos: "Hernández Torres",    correo: "pablo.hernandez@udem.edu" },
+        { matricula: "619874",  nombre: "Sofía",      apellidos: "Ramírez Vega",        correo: "sofia.ramirez@udem.edu" },
+        { matricula: "602567",  nombre: "Diego",      apellidos: "López Mendoza",       correo: "diego.lopez@udem.edu" }
+    ];
+
+    const maestros = [
+        { nomina: "12345", nombre: "Roberto",       apellidos: "Jiménez Cruz",        correo: "roberto.jimenez@udem.edu" },
+        { nomina: "23456", nombre: "Ana María",     apellidos: "Vargas Ruiz",         correo: "ana.vargas@udem.edu" },
+        { nomina: "34567", nombre: "Miguel Ángel",  apellidos: "Castro López",        correo: "miguel.castro@udem.edu" },
+        { nomina: "45678", nombre: "Patricia",      apellidos: "Morales Díaz",        correo: "patricia.morales@udem.edu" },
+        { nomina: "56789", nombre: "Ernesto",       apellidos: "Fuentes Ibarra",      correo: "ernesto.fuentes@udem.edu" }
+    ];
+
+    function buscarEnBD() {
+        const id  = document.getElementById("username").value.trim();
+        const msg = document.getElementById("searchMsg");
+
+        if (!id) {
+            msg.className = "search-msg not-found";
+            msg.textContent = "Ingresa una matrícula o nómina antes de buscar.";
+            msg.style.display = "block";
+            return;
+        }
+
+        const alumno  = alumnos.find(a => a.matricula.toUpperCase() === id.toUpperCase());
+        const maestro = maestros.find(m => m.nomina.toUpperCase()   === id.toUpperCase());
+        const persona = alumno || maestro;
+
+        if (persona) {
+            document.getElementById("nombre").value    = persona.nombre;
+            document.getElementById("apellidos").value = persona.apellidos;
+            document.getElementById("correo").value    = persona.correo;
+
+            const tipo = alumno ? "alumno" : "maestro";
+            msg.className = "search-msg found";
+            msg.textContent = `Usuario encontrado (${tipo}): ${persona.nombre} ${persona.apellidos}`;
+        } else {
+            document.getElementById("nombre").value    = "";
+            document.getElementById("apellidos").value = "";
+            document.getElementById("correo").value    = "";
+
+            msg.className = "search-msg not-found";
+            msg.textContent = `No se encontró ningún registro con el ID "${id}".`;
+        }
+
+        msg.style.display = "block";
+    }
+</script>
+</body>
+</html>

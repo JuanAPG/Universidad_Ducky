@@ -7,12 +7,15 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html { height: 100%; overflow: hidden; }
+
         body {
             font-family: Arial, Helvetica, sans-serif;
             background: #f2f4f7;
             color: #111;
             display: flex;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .main-col {
@@ -20,6 +23,7 @@
             display: flex;
             flex-direction: column;
             min-width: 0;
+            overflow-y: auto;
         }
 
         /* ── Topbar ── */
@@ -84,6 +88,8 @@
         .content {
             flex: 1;
             padding: 32px;
+            width: 100%;
+            min-width: 0;
         }
 
         /* ── Form card ── */
@@ -92,7 +98,7 @@
             border-radius: 16px;
             padding: 36px 40px 40px;
             box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            max-width: 860px;
+            width: 100%;
         }
 
         .form-header {
@@ -249,7 +255,7 @@
             <div class="form-card">
                 <div class="form-header">
                     <h1>Nuevo Libro</h1>
-                    <a class="btn-back" href="/dashboard">&#8592; Volver</a>
+                    <a class="btn-back" href="/libros">&#8592; Volver</a>
                 </div>
 
                 <form th:action="@{/libros/nuevo}" method="post">
@@ -354,36 +360,22 @@
         </div>
     </div>
 
-    <!-- Template for cloning author selects -->
-    <template id="autor-template">
-        <div class="autor-slot">
-            <select name="autorIds">
-                <option value="" disabled selected>Ingresa la informaci&oacute;n</option>
-                [[${autoresJson}]]
-            </select>
-            <button type="button" class="btn-remove-autor" onclick="this.parentElement.remove()">&#215;</button>
-        </div>
-    </template>
+    <!-- Hidden select used as a template for cloning author options via JS -->
+    <select id="autor-options-template" style="display:none" aria-hidden="true">
+        <option value="" disabled selected>Ingresa la informaci&oacute;n</option>
+        <option th:each="a : ${autores}"
+                th:value="${a['id_autor']}"
+                th:text="${a['nombre']}">Autor</option>
+    </select>
 
-    <script th:inline="javascript">
-        const autoresData = [[${autores}]];
-
-        function buildOptions() {
-            return autoresData.map(a =>
-                `<option value="${a.id_autor}">${a.nombre}</option>`
-            ).join('');
-        }
-
+    <script>
         function agregarAutor() {
+            const templateOptions = document.getElementById('autor-options-template').innerHTML;
             const slot = document.createElement('div');
             slot.className = 'autor-slot';
-            slot.innerHTML = `
-                <select name="autorIds">
-                    <option value="" disabled selected>Ingresa la información</option>
-                    ${buildOptions()}
-                </select>
-                <button type="button" class="btn-remove-autor" onclick="this.parentElement.remove()">&#215;</button>
-            `;
+            slot.innerHTML =
+                '<select name="autorIds">' + templateOptions + '</select>' +
+                '<button type="button" class="btn-remove-autor" onclick="this.parentElement.remove()">&#215;</button>';
             document.getElementById('autores-container').appendChild(slot);
         }
     </script>
