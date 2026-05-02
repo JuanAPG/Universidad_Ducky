@@ -145,4 +145,19 @@ public class AdminController {
 
         return "redirect:/usuarios";
     }
+
+    @PostMapping("/usuarios/eliminar/{id}")
+    public String eliminarUsuario(@PathVariable int id, HttpSession session) {
+        Usuario admin = getAdmin(session);
+        if (admin == null) {
+            return "redirect:/";
+        }
+        if (admin.getId() != null && admin.getId() == id) {
+            return "redirect:/usuarios";
+        }
+        if (usuarioRepository.findById(id) != null) {
+            usuarioRepository.delete(id);
+        }
+        return "redirect:/usuarios";
+    }
 }

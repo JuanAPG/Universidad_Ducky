@@ -105,6 +105,12 @@ public class UsuarioRepository {
         replacePermissions(id, permisos);
     }
 
+    @Transactional
+    public void delete(int id) {
+        jdbcTemplate.update("DELETE FROM usuario_permiso WHERE id_usuario = ?", id);
+        jdbcTemplate.update("DELETE FROM usuario WHERE id_usuario = ?", id);
+    }
+
     private void replacePermissions(int userId, List<String> permisos) {
         jdbcTemplate.update("DELETE FROM usuario_permiso WHERE id_usuario = ?", userId);
 
