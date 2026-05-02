@@ -12,7 +12,7 @@ public class Usuario {
     private String nombre;
     private String apellidos;
     private String tipo;
-    private String direccion;
+    private String correo;
     private List<Prestamo> prestamos = new ArrayList<>();
     private List<Multa> multas = new ArrayList<>();
     private Set<UsuarioPermiso> permisos = new HashSet<>();
@@ -20,14 +20,14 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(Integer id, String username, String contrasena, String nombre, String apellidos, String direccion, String tipo) {
+    public Usuario(Integer id, String username, String contrasena, String nombre, String apellidos, String correo, String tipo) {
         this.id = id;
         this.username = username;
         this.contrasena = contrasena;
         this.nombre = nombre;
         this.apellidos = apellidos;
         this.tipo = tipo;
-        this.direccion = direccion;
+        this.correo = correo;
     }
 
     public Integer getId() {
@@ -78,20 +78,12 @@ public class Usuario {
         this.tipo = tipo;
     }
 
-    public String getDireccion() {
-        return direccion;
-    }
-
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
-    }
-
     public String getCorreo() {
-        return direccion;
+        return correo;
     }
 
     public void setCorreo(String correo) {
-        this.direccion = correo;
+        this.correo = correo;
     }
 
     public List<Prestamo> getPrestamos() {

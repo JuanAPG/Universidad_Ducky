@@ -27,18 +27,18 @@ public class UsuarioRepository {
 
     public List<Map<String, Object>> findAll() {
         return jdbcTemplate.queryForList(
-                "SELECT id_usuario, username, nombre, apellidos, tipo, direccion AS correo FROM usuario ORDER BY apellidos, nombre");
+                "SELECT id_usuario, username, nombre, apellidos, tipo, correo FROM usuario ORDER BY apellidos, nombre");
     }
 
     public Usuario findByUsernameAndPassword(String username, String contrasena) {
-        String sql = "SELECT id_usuario, username, contrasena, nombre, apellidos, tipo, direccion " +
+        String sql = "SELECT id_usuario, username, contrasena, nombre, apellidos, tipo, correo " +
                      "FROM usuario WHERE username = ? AND contrasena = ?";
         List<Usuario> usuarios = jdbcTemplate.query(sql, (rs, rowNum) -> mapUsuario(rs), username, contrasena);
         return usuarios.isEmpty() ? null : usuarios.get(0);
     }
 
     public Usuario findById(int id) {
-        String sql = "SELECT id_usuario, username, contrasena, nombre, apellidos, tipo, direccion " +
+        String sql = "SELECT id_usuario, username, contrasena, nombre, apellidos, tipo, correo " +
                      "FROM usuario WHERE id_usuario = ?";
         List<Usuario> usuarios = jdbcTemplate.query(sql, (rs, rowNum) -> mapUsuario(rs), id);
         return usuarios.isEmpty() ? null : usuarios.get(0);
@@ -64,7 +64,7 @@ public class UsuarioRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO usuario (username, contrasena, nombre, apellidos, tipo, direccion) VALUES (?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO usuario (username, contrasena, nombre, apellidos, tipo, correo) VALUES (?, ?, ?, ?, ?, ?)",
                     new String[]{"id_usuario"});
             ps.setString(1, normalize(username));
             ps.setString(2, contrasena);
@@ -92,7 +92,7 @@ public class UsuarioRepository {
                        String tipo, String correo, List<String> permisos) {
         String correoNormalizado = normalize(correo);
         jdbcTemplate.update(
-                "UPDATE usuario SET username = ?, contrasena = ?, nombre = ?, apellidos = ?, tipo = ?, direccion = ? WHERE id_usuario = ?",
+                "UPDATE usuario SET username = ?, contrasena = ?, nombre = ?, apellidos = ?, tipo = ?, correo = ? WHERE id_usuario = ?",
                 normalize(username),
                 contrasena,
                 normalize(nombre),
@@ -140,7 +140,7 @@ public class UsuarioRepository {
         u.setNombre(rs.getString("nombre"));
         u.setApellidos(rs.getString("apellidos"));
         u.setTipo(rs.getString("tipo"));
-        u.setCorreo(rs.getString("direccion"));
+        u.setCorreo(rs.getString("correo"));
         return u;
     }
 
