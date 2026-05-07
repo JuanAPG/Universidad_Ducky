@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devolución – Librería Ducky</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { height: 100%; overflow: hidden; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f4f7;
+            color: #111;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .main-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow-y: auto;
+        }
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: #fff;
+            border-bottom: 1px solid #e2e6ed;
+            flex-shrink: 0;
+        }
+        .content { flex: 1; padding: 32px; }
+        h1 { font-size: 1.9rem; font-weight: 700; margin-bottom: 20px; }
+
+        /* Card */
+        .card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 28px 32px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+            max-width: 720px;
+        }
+        .card h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; }
+
+        /* Field */
+        .field-group { margin-bottom: 20px; }
+        .field-group label { display: block; font-size: 0.88rem; font-weight: 700; color: #555; margin-bottom: 8px; }
+        .field-group input {
+            width: 100%; height: 46px; padding: 0 14px;
+            border: 1.5px solid #d7dce4; border-radius: 12px;
+            font-size: 0.95rem; color: #111; background: #f8fafc; outline: none;
+        }
+        .field-group input:focus { border-color: #00528C; background: #fff; }
+
+        /* User info block */
+        .user-block {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .user-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #e8f1fb; border: 1.5px solid #b8d0ee;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; color: #00528C; font-size: 1.1rem;
+        }
+        .user-name { font-size: 1rem; font-weight: 700; }
+        .user-sub  { font-size: 0.8rem; color: #888; margin-top: 2px; }
+        .user-loans{ font-size: 0.82rem; color: #00528C; font-weight: 700; margin-top: 6px; }
+
+        /* Loan card */
+        .section-lbl {
+            font-size: 0.82rem; font-weight: 700; color: #888;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;
+        }
+        .loan-list { display: flex; flex-direction: column; gap: 10px; }
+        .loan-card {
+            border: 1.5px solid #e2e6ed;
+            border-radius: 10px;
+            padding: 16px;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+            position: relative;
+        }
+        .loan-card:hover  { border-color: #00528C; background: #f7fbff; }
+        .loan-card.selected { border-color: #00528C; background: #edf4ff; }
+        .loan-card.overdue  { border-left: 4px solid #e53e3e; }
+        .loan-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .book-icon { font-size: 1.1rem; }
+        .loan-title { font-size: 0.95rem; font-weight: 700; }
+        .loan-authors { font-size: 0.82rem; color: #00528C; margin-bottom: 8px; }
+        .loan-meta {
+            display: flex; justify-content: space-between; flex-wrap: wrap;
+            gap: 6px; font-size: 0.8rem; color: #666; margin-bottom: 6px;
+        }
+        .loan-due { font-size: 0.82rem; }
+        .loan-due.overdue { color: #e53e3e; font-weight: 700; }
+
+        .footer-bar {
+            display: flex;
+            justify-content: flex-end;
+            max-width: 720px;
+            padding-top: 4px;
+        }
+
+        /* Condition options */
+        .condition-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+        .condition-option {
+            border: 1.5px solid #e2e6ed;
+            border-radius: 10px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .condition-option:hover  { border-color: #00528C; background: #f7fbff; }
+        .condition-option.selected { border-color: #00528C; background: #edf4ff; }
+        .condition-option input[type=radio] { display: none; }
+        .cond-dot {
+            width: 18px; height: 18px; border-radius: 50%; border: 2px solid #d0d5dd;
+            flex-shrink: 0; margin-top: 2px; transition: border-color 0.15s;
+        }
+        .condition-option.selected .cond-dot { border-color: #00528C; background: #00528C; }
+        .cond-name  { font-size: 0.95rem; font-weight: 700; margin-bottom: 2px; }
+        .cond-desc  { font-size: 0.82rem; color: #888; }
+
+        /* Summary */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 32px;
+            margin-bottom: 24px;
+        }
+        .sf-label { font-size: 0.78rem; color: #888; font-weight: 600; margin-bottom: 3px; }
+        .sf-value { font-size: 0.95rem; font-weight: 700; }
+
+        .cargo-row {
+            display: flex; justify-content: space-between;
+            font-size: 0.9rem; color: #555; padding: 8px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .total-row {
+            display: flex; justify-content: space-between;
+            font-size: 1rem; font-weight: 700; padding-top: 12px;
+            margin-top: 4px;
+        }
+        .total-row .amount { color: #00528C; }
+        .warning-box {
+            background: #fff8ee;
+            border: 1.5px solid #f6d860;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.82rem;
+            color: #7a5800;
+            margin-top: 16px;
+        }
+
+        /* Completion */
+        .completion-icon {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: #e6f9ee;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .completion-icon svg { width: 40px; height: 40px; }
+        .completion-title { text-align: center; font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+        .completion-sub   { text-align: center; font-size: 0.9rem; color: #666; margin-bottom: 24px; }
+        .multa-banner {
+            background: #fff3e8;
+            border: 1.5px solid #f6c89a;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+        }
+        .multa-banner .mb-title { font-size: 0.9rem; font-weight: 700; color: #b25c00; }
+        .multa-banner .mb-sub   { font-size: 0.8rem; color: #9a5000; margin-top: 4px; }
+        .detail-block {
+            border-top: 1px solid #e2e6ed;
+            padding-top: 20px;
+        }
+        .detail-header {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.88rem; font-weight: 700; color: #444;
+            margin-bottom: 16px;
+        }
+        .detail-row {
+            display: flex; justify-content: space-between;
+            padding: 10px 0; border-bottom: 1px solid #f0f2f5;
+            font-size: 0.9rem;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-row .dr-label { color: #888; }
+        .detail-row .dr-value { font-weight: 600; text-align: right; max-width: 60%; }
+
+        /* Buttons */
+        .btn-primary {
+            padding: 11px 24px; border: none; border-radius: 10px;
+            background: #00528C; color: #fff; font-size: 0.92rem; font-weight: 700;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+            text-decoration: none; white-space: nowrap;
+        }
+        .btn-primary:hover { background: #003f6b; }
+        .btn-primary:disabled { background: #b0c4d8; cursor: not-allowed; }
+        .btn-primary.full { width: 100%; justify-content: center; }
+        .btn-back {
+            padding: 11px 20px; border: 1.5px solid #d7dce4; border-radius: 10px;
+            background: #fff; color: #444; font-size: 0.88rem; font-weight: 700;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+            text-decoration: none;
+        }
+        .btn-back:hover { background: #f2f4f7; }
+        .btn-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+
+        .error-msg {
+            display: none; background: #fdecea; color: #b71c1c;
+            border: 1.5px solid #f5b8b5; border-radius: 10px;
+            padding: 10px 16px; font-size: 0.88rem; font-weight: 600; margin-bottom: 16px;
+        }
+
+        .step { display: none; }
+        .step.active { display: block; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar_admin :: sidebar(usuario=${usuario})}"></div>
+
+    <div class="main-col">
+        <div class="topbar">
+            <a class="btn-back" href="/libros">&#8592; Volver a Libros</a>
+        </div>
+
+        <div class="content">
+            <h1>Devolución de Libro</h1>
+
+            <!-- ── PASO 1: buscar usuario ─────────────────────────────────── -->
+            <div id="step1" class="step active">
+                <div class="card">
+                    <h2>Buscar Estudiante</h2>
+                    <div id="step1Error" class="error-msg">No se encontró ningún usuario con ese ID.</div>
+                    <div class="field-group">
+                        <label for="inputUsername">ID (Matrícula / Nómina)</label>
+                        <input id="inputUsername" type="text" placeholder="Ej. 611380"
+                               onkeydown="if(event.key==='Enter') buscarUsuario()">
+                    </div>
+                    <button class="btn-primary" onclick="buscarUsuario()">
+                        Buscar Alumno en Base de Datos
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── PASO 2: seleccionar préstamo ──────────────────────────── -->
+            <div id="step2" class="step">
+                <div class="card">
+                    <h2>Información del Préstamo</h2>
+
+                    <div class="user-block">
+                        <div class="user-avatar">&#128100;</div>
+                        <div>
+                            <div class="user-name" id="s2Nombre"></div>
+                            <div class="user-sub" id="s2Sub"></div>
+                            <div class="user-loans" id="s2Loans"></div>
+                        </div>
+                    </div>
+
+                    <p class="section-lbl">Selecciona el libro a devolver</p>
+                    <div id="loanList" class="loan-list">
+                        <p style="color:#999;text-align:center;padding:20px 0;">Cargando...</p>
+                    </div>
+                </div>
+
+                <div class="footer-bar">
+                    <button id="btnContinuar2" class="btn-primary" disabled onclick="irPaso3()">
+                        Continuar con este libro &#8594;
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── PASO 3: estado del libro ───────────────────────────────── -->
+            <div id="step3" class="step">
+                <div class="card">
+                    <h2>Estado del Libro</h2>
+                    <p style="font-size:0.88rem;color:#555;margin-bottom:16px;">Selecciona el estado del libro</p>
+
+                    <div class="condition-list">
+                        <label class="condition-option" onclick="seleccionarCondicion(this,'normal')">
+                            <input type="radio" name="condicion" value="normal">
+                            <div class="cond-dot"></div>
+                            <div>
+                                <div class="cond-name">Normal</div>
+                                <div class="cond-desc">El libro se encuentra en buen estado</div>
+                            </div>
+                        </label>
+                        <label class="condition-option" onclick="seleccionarCondicion(this,'danado')">
+                            <input type="radio" name="condicion" value="danado">
+                            <div class="cond-dot"></div>
+                            <div>
+                                <div class="cond-name">Dañado</div>
+                                <div class="cond-desc">El libro presenta daños físicos (+$100 MXN)</div>
+                            </div>
+                        </label>
+                        <label class="condition-option" onclick="seleccionarCondicion(this,'perdido')">
+                            <input type="radio" name="condicion" value="perdido">
+                            <div class="cond-dot"></div>
+                            <div>
+                                <div class="cond-name">Perdido</div>
+                                <div class="cond-desc">El usuario reporta el libro como perdido (+$500 MXN)</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div style="display:flex;justify-content:flex-end;">
+                        <button id="btnContinuar3" class="btn-primary" disabled onclick="irPaso4()">
+                            Continuar &#8594;
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── PASO 4: resumen ────────────────────────────────────────── -->
+            <div id="step4" class="step">
+                <div class="card">
+                    <h2>Resumen de Devolución</h2>
+
+                    <div class="summary-grid">
+                        <div>
+                            <div class="sf-label">Usuario</div>
+                            <div class="sf-value" id="s4Nombre"></div>
+                        </div>
+                        <div>
+                            <div class="sf-label">ID</div>
+                            <div class="sf-value" id="s4Id"></div>
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <div class="sf-label">Libro</div>
+                            <div class="sf-value" id="s4Libro"></div>
+                            <div style="font-size:0.82rem;color:#888;margin-top:2px;" id="s4Autores"></div>
+                        </div>
+                        <div>
+                            <div class="sf-label">Estado del libro</div>
+                            <div class="sf-value" id="s4Estado"></div>
+                        </div>
+                        <div>
+                            <div class="sf-label">Días de retraso</div>
+                            <div class="sf-value" id="s4Retraso"></div>
+                        </div>
+                    </div>
+
+                    <p class="section-lbl">Detalle de Cargos</p>
+                    <div id="cargosList"></div>
+                    <div class="total-row">
+                        <span>Total a pagar</span>
+                        <span class="amount" id="s4Total"></span>
+                    </div>
+
+                    <div id="s4Warning" class="warning-box" style="display:none;">
+                        &#9888; El usuario no podrá realizar nuevos préstamos hasta liquidar la multa pendiente.
+                    </div>
+
+                    <div class="btn-actions">
+                        <button class="btn-back" onclick="irPaso3()">&#8592; Regresar</button>
+                        <button class="btn-primary" onclick="procesarDevolucion()">Procesar Devolución</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── PASO 5: completado ─────────────────────────────────────── -->
+            <div id="step5" class="step">
+                <div class="card">
+                    <div class="completion-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#1a7a44" stroke-width="2.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="7 12 10.5 15.5 17 9"/>
+                        </svg>
+                    </div>
+                    <p class="completion-title">Devolución Completada</p>
+                    <p class="completion-sub">El libro ha sido devuelto exitosamente</p>
+
+                    <div id="multaBanner" class="multa-banner" style="display:none;">
+                        <div class="mb-title" id="multaBannerTitle"></div>
+                        <div class="mb-sub">El usuario no podrá realizar nuevos préstamos hasta liquidar la multa.</div>
+                    </div>
+
+                    <div class="detail-block">
+                        <div class="detail-header">&#128218; Detalles de la Devolución</div>
+                        <div class="detail-row">
+                            <span class="dr-label">Usuario:</span>
+                            <span class="dr-value" id="s5Nombre"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="dr-label">ID:</span>
+                            <span class="dr-value" id="s5Id"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="dr-label">Libro:</span>
+                            <span class="dr-value" id="s5Libro"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="dr-label">Estado:</span>
+                            <span class="dr-value" id="s5Estado"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="dr-label">Fecha de devolución:</span>
+                            <span class="dr-value" id="s5Fecha"></span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:24px;">
+                        <a href="/devolucion" class="btn-primary full">Nueva Devolución</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+    let usuarioDev       = null;
+    let prestamoSel      = null;
+    let estadoLibro      = null;
+
+    const MULTA_DIA      = 5;
+    const MULTA_DANO     = 100;
+    const MULTA_PERDIDO  = 500;
+
+    const LABELS_ESTADO  = { normal: 'Normal', danado: 'Dañado', perdido: 'Perdido' };
+
+    // ── utilidades ────────────────────────────────────────────────────────────
+    function irPaso(n) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + n).classList.add('active');
+    }
+    function escHtml(s) {
+        return String(s ?? '')
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function fmtFecha(val) {
+        if (!val) return 'N/A';
+        let d;
+        if (typeof val === 'number') {
+            d = new Date(val);
+        } else {
+            const parts = String(val).substring(0, 10).split('-').map(Number);
+            d = new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+        return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    function fmtMXN(n) {
+        return '$' + Number(n).toFixed(0) + ' MXN';
+    }
+
+    // ── Paso 1 ────────────────────────────────────────────────────────────────
+    async function buscarUsuario() {
+        const username = document.getElementById('inputUsername').value.trim();
+        if (!username) return;
+
+        const errEl = document.getElementById('step1Error');
+        errEl.style.display = 'none';
+
+        const res = await fetch('/devolucion/buscar-usuario', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ username }).toString()
+        });
+
+        if (!res.ok) { errEl.style.display = 'block'; return; }
+
+        usuarioDev = await res.json();
+        await cargarPrestamos();
+        mostrarInfoUsuario();
+        irPaso(2);
+    }
+
+    // ── Paso 2 ────────────────────────────────────────────────────────────────
+    function mostrarInfoUsuario() {
+        document.getElementById('s2Nombre').textContent = usuarioDev.nombre + ' ' + usuarioDev.apellidos;
+        document.getElementById('s2Sub').textContent    = 'Estudiante • ID: ' + usuarioDev.username;
+        document.getElementById('s2Loans').textContent  = prestamosActivos.length + ' préstamo(s) activo(s)';
+    }
+
+    let prestamosActivos = [];
+
+    async function cargarPrestamos() {
+        const res = await fetch('/devolucion/prestamos-activos?idUsuario=' + usuarioDev.id_usuario);
+        if (!res.ok) return;
+        prestamosActivos = await res.json();
+
+        const list = document.getElementById('loanList');
+        if (prestamosActivos.length === 0) {
+            list.innerHTML = '<p style="color:#999;text-align:center;padding:24px 0;">Este usuario no tiene préstamos activos.</p>';
+            document.getElementById('btnContinuar2').disabled = true;
+            return;
+        }
+
+        list.innerHTML = prestamosActivos.map((p, i) => {
+            const retraso   = Number(p.dias_retraso) || 0;
+            const esVencido = retraso > 0;
+            const dueClass  = esVencido ? 'loan-due overdue' : 'loan-due';
+            const dueText   = esVencido
+                ? `Fecha límite: <strong>${fmtFecha(p.fecha_fin)}</strong> (${retraso} día${retraso !== 1 ? 's' : ''} de retraso)`
+                : `Fecha límite: ${fmtFecha(p.fecha_fin)}`;
+            return `
+                <div class="loan-card ${esVencido ? 'overdue' : ''}" onclick="seleccionarPrestamo(this, ${i})">
+                    <div class="loan-header">
+                        <span class="book-icon">&#128218;</span>
+                        <span class="loan-title">${escHtml(p.titulo)}</span>
+                    </div>
+                    <div class="loan-authors">${escHtml(p.autores)}</div>
+                    <div class="loan-meta">
+                        <span>ISBN: ${escHtml(p.isbn)}</span>
+                        <span>Préstamo: ${fmtFecha(p.fecha_inicio)}</span>
+                    </div>
+                    <div class="${dueClass}">${dueText}</div>
+                </div>`;
+        }).join('');
+    }
+
+    function seleccionarPrestamo(el, idx) {
+        document.querySelectorAll('.loan-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        prestamoSel = prestamosActivos[idx];
+        document.getElementById('btnContinuar2').disabled = false;
+    }
+
+    function irPaso3() {
+        if (!prestamoSel) return;
+        // Reset condition
+        document.querySelectorAll('.condition-option').forEach(o => o.classList.remove('selected'));
+        estadoLibro = null;
+        document.getElementById('btnContinuar3').disabled = true;
+        irPaso(3);
+    }
+
+    // ── Paso 3 ────────────────────────────────────────────────────────────────
+    function seleccionarCondicion(el, valor) {
+        document.querySelectorAll('.condition-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        estadoLibro = valor;
+        document.getElementById('btnContinuar3').disabled = false;
+    }
+
+    function irPaso4() {
+        if (!estadoLibro || !prestamoSel) return;
+
+        const retraso   = Number(prestamoSel.dias_retraso) || 0;
+        const multaBase = retraso * MULTA_DIA;
+        const multaExtra= estadoLibro === 'danado' ? MULTA_DANO
+                        : estadoLibro === 'perdido' ? MULTA_PERDIDO : 0;
+        const total     = multaBase + multaExtra;
+
+        // Summary fields
+        document.getElementById('s4Nombre').textContent  = usuarioDev.nombre + ' ' + usuarioDev.apellidos;
+        document.getElementById('s4Id').textContent      = usuarioDev.username;
+        document.getElementById('s4Libro').textContent   = prestamoSel.titulo;
+        document.getElementById('s4Autores').textContent = prestamoSel.autores;
+        document.getElementById('s4Estado').textContent  = LABELS_ESTADO[estadoLibro];
+        document.getElementById('s4Retraso').textContent = retraso > 0 ? retraso + ' día' + (retraso !== 1 ? 's' : '') : 'Sin retraso';
+
+        // Cargos
+        let cargosHtml = '';
+        if (multaBase > 0)
+            cargosHtml += `<div class="cargo-row"><span>Multa por retraso (${retraso} día${retraso!==1?'s':''})</span><span>${fmtMXN(multaBase)}</span></div>`;
+        if (multaExtra > 0)
+            cargosHtml += `<div class="cargo-row"><span>Cargo por libro ${LABELS_ESTADO[estadoLibro].toLowerCase()}</span><span>${fmtMXN(multaExtra)}</span></div>`;
+        if (cargosHtml === '')
+            cargosHtml = `<div class="cargo-row"><span>Sin cargos adicionales</span><span>$0 MXN</span></div>`;
+        document.getElementById('cargosList').innerHTML = cargosHtml;
+
+        document.getElementById('s4Total').textContent = fmtMXN(total);
+        document.getElementById('s4Warning').style.display = total > 0 ? 'block' : 'none';
+
+        irPaso(4);
+    }
+
+    // ── Paso 4 → 5: procesar ──────────────────────────────────────────────────
+    async function procesarDevolucion() {
+        const res = await fetch('/devolucion/procesar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                idPrestamo: prestamoSel.id_prestamo,
+                estadoLibro: estadoLibro
+            }).toString()
+        });
+
+        if (!res.ok) {
+            alert('Ocurrió un error al procesar la devolución.');
+            return;
+        }
+
+        const data = await res.json();
+        mostrarCompletado(data);
+    }
+
+    function mostrarCompletado(data) {
+        const monto = Number(data.monto_multa) || 0;
+
+        // Banner multa
+        const banner = document.getElementById('multaBanner');
+        if (monto > 0) {
+            document.getElementById('multaBannerTitle').textContent = 'Multa generada: ' + fmtMXN(monto);
+            banner.style.display = 'block';
+        } else {
+            banner.style.display = 'none';
+        }
+
+        // Details
+        document.getElementById('s5Nombre').textContent = usuarioDev.nombre + ' ' + usuarioDev.apellidos;
+        document.getElementById('s5Id').textContent     = usuarioDev.username;
+        document.getElementById('s5Libro').innerHTML    =
+            `<strong>${escHtml(data.titulo)}</strong><br><span style="font-size:0.8rem;color:#888;">${escHtml(data.autores)}</span>`;
+        document.getElementById('s5Estado').textContent = LABELS_ESTADO[data.estado_libro];
+        document.getElementById('s5Fecha').textContent  = fmtFecha(data.fecha_devolucion);
+
+        irPaso(5);
+    }
+</script>
+</body>
+</html>

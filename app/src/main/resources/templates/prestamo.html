@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Préstamo – Librería Ducky</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { height: 100%; overflow: hidden; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f4f7;
+            color: #111;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .main-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow-y: auto;
+        }
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: #fff;
+            border-bottom: 1px solid #e2e6ed;
+            flex-shrink: 0;
+        }
+        .content {
+            flex: 1;
+            padding: 32px;
+        }
+        h1 { font-size: 1.9rem; font-weight: 700; margin-bottom: 6px; }
+        .subtitle {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .subtitle .check {
+            width: 22px; height: 22px;
+            background: #00528C;
+            border-radius: 4px;
+            display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 0.85rem;
+        }
+
+        /* Cards */
+        .card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 28px 32px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+        .card h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; }
+
+        /* User info banner */
+        .user-banner {
+            background: #00528C;
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .user-banner .name { font-size: 1rem; font-weight: 700; }
+        .user-banner .meta { font-size: 0.82rem; margin-top: 4px; opacity: 0.88; }
+
+        /* Field */
+        .field-group { margin-bottom: 20px; }
+        .field-group label {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .field-group input {
+            width: 100%;
+            height: 46px;
+            padding: 0 14px;
+            border: 1.5px solid #d7dce4;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #111;
+            background: #f8fafc;
+            outline: none;
+        }
+        .field-group input:focus { border-color: #00528C; background: #fff; }
+
+        /* Search bar for books */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            border: 1.5px solid #d7dce4;
+            border-radius: 10px;
+            padding: 0 14px;
+            height: 46px;
+            background: #f8fafc;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-bar input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 0.93rem;
+            outline: none;
+            color: #111;
+        }
+        .search-bar input::placeholder { color: #9aa3b2; }
+        .search-bar button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #555;
+            font-size: 1.1rem;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Book list */
+        .section-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .book-list { display: flex; flex-direction: column; gap: 8px; }
+        .book-item {
+            border: 1.5px solid #e2e6ed;
+            border-radius: 10px;
+            padding: 14px 16px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .book-item.no-disponible { opacity: 0.6; }
+        .book-info { flex: 1; min-width: 0; }
+        .book-item .book-title { font-size: 0.93rem; font-weight: 700; color: #111; }
+        .book-item .book-author { font-size: 0.82rem; color: #666; margin-top: 3px; }
+        .status-badge {
+            flex-shrink: 0;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            border: 1.5px solid;
+        }
+        .status-disponible  { background: #e6f9ee; color: #1a7a44; border-color: #a8d5b5; }
+        .status-no-disponible { background: #f2f4f7; color: #888; border-color: #d0d5dd; }
+        .btn-prestar {
+            flex-shrink: 0;
+            padding: 7px 18px;
+            border: none;
+            border-radius: 8px;
+            background: #00528C;
+            color: #fff;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-prestar:hover { background: #003f6b; }
+        .empty-msg { color: #999; font-size: 0.9rem; text-align: center; padding: 24px 0; }
+
+        /* Comprobante */
+        .comprobante-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 32px;
+            margin-bottom: 24px;
+        }
+        .comprobante-field .cf-label {
+            font-size: 0.78rem;
+            color: #888;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .comprobante-field .cf-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #111;
+        }
+        .date-pills {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .date-pill {
+            background: #4A6CF7;
+            border-radius: 12px;
+            padding: 14px 20px;
+            color: #fff;
+        }
+        .date-pill .dp-label { font-size: 0.8rem; font-weight: 700; opacity: 0.85; }
+        .date-pill .dp-value { font-size: 0.95rem; font-weight: 700; margin-top: 4px; }
+
+        /* Opciones comprobante */
+        .opciones-grid {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .opcion-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 28px;
+            border: 1.5px solid #e2e6ed;
+            border-radius: 14px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #333;
+            text-decoration: none;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .opcion-btn:hover { border-color: #00528C; background: #f0f6ff; }
+        .opcion-icon {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+        }
+        .opcion-icon.print   { background: #e0f7f7; }
+        .opcion-icon.whatsapp{ background: #e6faea; }
+        .opcion-icon.correo  { background: #fce8f3; }
+
+        /* Buttons */
+        .btn-primary {
+            padding: 11px 24px;
+            border: none;
+            border-radius: 10px;
+            background: #00528C;
+            color: #fff;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-primary:hover { background: #003f6b; }
+        .btn-primary:disabled { background: #b0c4d8; cursor: not-allowed; }
+        .btn-back {
+            padding: 11px 20px;
+            border: 1.5px solid #d7dce4;
+            border-radius: 10px;
+            background: #fff;
+            color: #444;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-back:hover { background: #f2f4f7; }
+        .footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+        .error-msg {
+            display: none;
+            background: #fdecea;
+            color: #b71c1c;
+            border: 1.5px solid #f5b8b5;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .step { display: none; }
+        .step.active { display: block; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar_admin :: sidebar(usuario=${usuario})}"></div>
+
+    <div class="main-col">
+        <div class="topbar">
+            <a class="btn-back" href="/libros">&#8592; Volver a Libros</a>
+        </div>
+
+        <div class="content">
+            <h1>Préstamo de Libro</h1>
+
+            <!-- ── PASO 1: buscar usuario ───────────────────────────────── -->
+            <div id="step1" class="step active">
+                <div style="height:12px;"></div>
+                <div class="card" style="max-width:520px;">
+                    <h2>Buscar Estudiante</h2>
+                    <div id="step1Error" class="error-msg">No se encontró ningún usuario con ese ID.</div>
+                    <div class="field-group">
+                        <label for="inputUsername">ID (Matrícula / Nómina)</label>
+                        <input id="inputUsername" type="text" placeholder="Ej. 611380"
+                               onkeydown="if(event.key==='Enter') buscarUsuario()">
+                    </div>
+                    <button class="btn-primary" onclick="buscarUsuario()">
+                        Buscar Alumno en Base de Datos
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── PASO 2: seleccionar libro ───────────────────────────── -->
+            <div id="step2" class="step">
+                <p class="subtitle">Seleccionar Libro</p>
+
+                <div id="userBanner" class="user-banner">
+                    <div class="name" id="bannerNombre"></div>
+                    <div class="meta" id="bannerMeta"></div>
+                </div>
+
+                <div class="card">
+                    <div class="search-bar">
+                        <button type="button">&#9776;</button>
+                        <input id="searchLibros" type="text"
+                               placeholder="Buscar por título, autor o clave"
+                               oninput="buscarLibros(this.value)">
+                        <button type="button" onclick="buscarLibros(document.getElementById('searchLibros').value)">
+                            &#128269;
+                        </button>
+                    </div>
+
+                    <p class="section-label">Libros</p>
+                    <div id="bookList" class="book-list">
+                        <p class="empty-msg">Cargando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── PASO 3: comprobante ─────────────────────────────────── -->
+            <div id="step3" class="step">
+                <p class="subtitle">
+                    <span class="check">&#10003;</span>
+                    Préstamo Otorgado
+                </p>
+
+                <div class="card">
+                    <h2>Comprobante de préstamo</h2>
+                    <div class="comprobante-grid">
+                        <div class="comprobante-field">
+                            <div class="cf-label">Estudiante</div>
+                            <div class="cf-value" id="cNombre"></div>
+                        </div>
+                        <div class="comprobante-field">
+                            <div class="cf-label">Matrícula</div>
+                            <div class="cf-value" id="cMatricula"></div>
+                        </div>
+                        <div class="comprobante-field">
+                            <div class="cf-label">Libro</div>
+                            <div class="cf-value" id="cLibro"></div>
+                        </div>
+                        <div class="comprobante-field">
+                            <div class="cf-label">ID Copia</div>
+                            <div class="cf-value" id="cId"></div>
+                        </div>
+                    </div>
+                    <div class="date-pills">
+                        <div class="date-pill">
+                            <div class="dp-label">Fecha de Préstamo</div>
+                            <div class="dp-value" id="cFechaInicio"></div>
+                        </div>
+                        <div class="date-pill">
+                            <div class="dp-label">Fecha de Entrega</div>
+                            <div class="dp-value" id="cFechaFin"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Opciones de Comprobante</h2>
+                    <div class="opciones-grid">
+                        <button class="opcion-btn" onclick="imprimirComprobante()">
+                            <span class="opcion-icon print">&#128438;</span>
+                            Imprimir
+                        </button>
+                        <a id="btnWhatsapp" class="opcion-btn" href="#" target="_blank">
+                            <span class="opcion-icon whatsapp">&#128172;</span>
+                            WhatsApp
+                        </a>
+                        <a id="btnCorreo" class="opcion-btn" href="#">
+                            <span class="opcion-icon correo">&#9993;</span>
+                            Correo
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-actions">
+                    <a class="btn-primary" href="/prestamo">
+                        Nuevo Préstamo &#8594;
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let usuarioActual = null;
+    let copiaSeleccionada = null;
+    let searchTimeout = null;
+
+    // ── Paso 1 ────────────────────────────────────────────────────────────────
+    async function buscarUsuario() {
+        const username = document.getElementById('inputUsername').value.trim();
+        if (!username) return;
+
+        const errEl = document.getElementById('step1Error');
+        errEl.style.display = 'none';
+
+        const params = new URLSearchParams({ username });
+        const res = await fetch('/prestamo/buscar-usuario', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+        });
+
+        if (!res.ok) {
+            errEl.style.display = 'block';
+            return;
+        }
+
+        usuarioActual = await res.json();
+        mostrarPaso2();
+    }
+
+    function mostrarPaso2() {
+        document.getElementById('step1').classList.remove('active');
+        document.getElementById('step2').classList.add('active');
+
+        document.getElementById('bannerNombre').textContent =
+            usuarioActual.nombre + ' ' + usuarioActual.apellidos;
+        document.getElementById('bannerMeta').textContent =
+            'Matrícula: ' + usuarioActual.username +
+            '  |  Préstamos Disponibles: ' + usuarioActual.prestamos_disponibles;
+
+        cargarLibros('');
+    }
+
+    // ── Paso 2 ────────────────────────────────────────────────────────────────
+    function buscarLibros(q) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => cargarLibros(q), 300);
+    }
+
+    async function cargarLibros(q) {
+        const url = '/prestamo/buscar-libros' + (q ? '?q=' + encodeURIComponent(q) : '');
+        const res = await fetch(url);
+        if (!res.ok) return;
+        const copias = await res.json();
+
+        const list = document.getElementById('bookList');
+        if (copias.length === 0) {
+            list.innerHTML = '<p class="empty-msg">No se encontraron libros.</p>';
+            return;
+        }
+
+        list.innerHTML = copias.map(c => {
+            const disponible = c.estado === 'disponible';
+            const badge = disponible
+                ? `<span class="status-badge status-disponible">Disponible</span>`
+                : `<span class="status-badge status-no-disponible">No disponible</span>`;
+            const btn = disponible
+                ? `<button class="btn-prestar" onclick="prestarDirecto(${c.id_copia})">Prestar</button>`
+                : '';
+            return `
+                <div class="book-item ${disponible ? '' : 'no-disponible'}">
+                    <div class="book-info">
+                        <div class="book-title">${escHtml(c.titulo)}</div>
+                        <div class="book-author">Autor: ${escHtml(c.autores)}</div>
+                    </div>
+                    ${badge}
+                    ${btn}
+                </div>`;
+        }).join('');
+    }
+
+    // ── Paso 3 ────────────────────────────────────────────────────────────────
+    async function prestarDirecto(idCopia) {
+        if (!usuarioActual) return;
+
+        const params = new URLSearchParams({
+            idUsuario: usuarioActual.id_usuario,
+            idCopia: idCopia
+        });
+
+        const res = await fetch('/prestamo/crear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+        });
+
+        if (!res.ok) {
+            alert('No se pudo registrar el préstamo. La copia ya no está disponible.');
+            cargarLibros(document.getElementById('searchLibros').value);
+            return;
+        }
+
+        const data = await res.json();
+        mostrarComprobante(data);
+    }
+
+    function mostrarComprobante(data) {
+        document.getElementById('step2').classList.remove('active');
+        document.getElementById('step3').classList.add('active');
+
+        document.getElementById('cNombre').textContent    = data.nombre_completo;
+        document.getElementById('cMatricula').textContent = data.matricula;
+        document.getElementById('cLibro').textContent     = data.titulo_libro;
+        document.getElementById('cId').textContent        = 'C' + String(data.id_copia).padStart(3, '0');
+
+        document.getElementById('cFechaInicio').textContent = fmtFecha(data.fechaInicio);
+        document.getElementById('cFechaFin').textContent    = fmtFecha(data.fechaFin);
+
+        const texto =
+            `Comprobante de Préstamo - Biblioteca Ducky\n` +
+            `Estudiante: ${data.nombre_completo}\n` +
+            `Matrícula: ${data.matricula}\n` +
+            `Libro: ${data.titulo_libro} (ID: C${String(data.id_copia).padStart(3, '0')})\n` +
+            `Préstamo: ${document.getElementById('cFechaInicio').textContent}\n` +
+            `Entrega: ${document.getElementById('cFechaFin').textContent}`;
+
+        document.getElementById('btnWhatsapp').href =
+            'https://wa.me/?text=' + encodeURIComponent(texto);
+        document.getElementById('btnCorreo').href =
+            'mailto:?subject=' + encodeURIComponent('Comprobante de Préstamo - Biblioteca Ducky') +
+            '&body=' + encodeURIComponent(texto);
+    }
+
+    function imprimirComprobante() {
+        window.print();
+    }
+
+    function fmtFecha(val) {
+        if (!val) return 'N/A';
+        let d;
+        if (typeof val === 'number') {
+            d = new Date(val);
+        } else {
+            const parts = String(val).substring(0, 10).split('-').map(Number);
+            d = new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+        return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+</script>
+</body>
+</html>
