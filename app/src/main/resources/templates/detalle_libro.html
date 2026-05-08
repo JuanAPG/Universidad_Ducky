@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${libro['nombre']} + ' – Librería Ducky'">Detalle – Librería Ducky</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #fff;
+            color: #111;
+            min-height: 100vh;
+        }
+
+        .page-shell {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+        }
+
+        /* Back */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.82rem;
+            color: #888;
+            text-decoration: none;
+            margin-bottom: 28px;
+        }
+        .back-link:hover { color: #333; }
+
+        /* ── Header row ── */
+        .book-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .book-left  { flex: 1; min-width: 0; }
+        .book-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+
+        .book-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+        .book-author { font-size: 0.95rem; color: #444; margin-bottom: 4px; }
+        .book-year   { font-size: 0.88rem; color: #888; }
+
+        .status-disponible    { color: #C8941A; font-size: 0.9rem; font-weight: 700; }
+        .status-prestado      { color: #c0392b; font-size: 0.9rem; font-weight: 700; }
+        .status-mantenimiento { color: #888;    font-size: 0.9rem; font-weight: 700; }
+
+        .tipo-pill {
+            display: inline-block;
+            background: #C8941A;
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 50px;
+        }
+
+        hr { border: none; border-top: 1px solid #e2e6ed; margin: 24px 0; }
+
+        /* ── Sections ── */
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .sinopsis-text {
+            font-size: 0.93rem;
+            line-height: 1.75;
+            color: #444;
+        }
+
+        /* ── Info adicional ── */
+        .info-list { display: flex; flex-direction: column; gap: 7px; }
+
+        .info-row { font-size: 0.9rem; color: #333; }
+        .info-row b { color: #111; font-weight: 700; }
+
+        .ubicacion-block { margin-top: 10px; }
+        .ubicacion-block b { font-size: 0.9rem; }
+        .ubicacion-lines {
+            margin-top: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .ubicacion-lines span { font-size: 0.88rem; color: #444; }
+        .no-ubicacion { font-size: 0.88rem; color: #aaa; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar_user :: navbar}"></div>
+
+    <div class="page-shell">
+        <a class="back-link" href="/home">&#8592; Regresar al catálogo</a>
+
+        <!-- ── Encabezado ── -->
+        <div class="book-header">
+            <div class="book-left">
+                <h1 class="book-title"  th:text="${libro['nombre']}">Título</h1>
+                <p  class="book-author" th:text="${libro['autores']}">Autor</p>
+                <p  class="book-year"   th:text="${libro['anio'] != null ? libro['anio'] : ''}"></p>
+            </div>
+            <div class="book-right">
+                <span th:if="${hayDisponible}"     class="status-disponible">Disponible</span>
+                <span th:unless="${hayDisponible}" class="status-prestado">No disponible</span>
+                <span class="tipo-pill" th:text="${libro['tipo'] ?: 'General'}">Tipo</span>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- ── Sinopsis ── -->
+        <p class="section-title">Sinopsis</p>
+        <p class="sinopsis-text"
+           th:text="${#strings.isEmpty(libro['sinopsis']) ? 'Sin descripción disponible.' : libro['sinopsis']}">
+        </p>
+
+        <hr>
+
+        <!-- ── Información adicional ── -->
+        <p class="section-title">Información Adicional</p>
+        <div class="info-list">
+            <p class="info-row"><b>Editorial:</b> <span th:text="${libro['editorial'] ?: '–'}"></span></p>
+            <p class="info-row"><b>Número de Copias:</b> <span th:text="${copias != null ? copias.size() : 0}"></span></p>
+            <p class="info-row" th:if="${libro['num_paginas'] != null}">
+                <b>Número de páginas:</b> <span th:text="${libro['num_paginas']}"></span>
+            </p>
+            <p class="info-row" th:if="${libro['precio'] != null}">
+                <b>Precio:</b> $<span th:text="${libro['precio']}"></span>
+            </p>
+            <p class="info-row" th:if="${libro['isbn'] != null}">
+                <b>ISBN:</b> <span th:text="${libro['isbn']}"></span>
+            </p>
+
+            <!-- Ubicación: de la primera copia registrada -->
+            <div class="ubicacion-block">
+                <b>Ubicación en biblioteca:</b>
+                <div class="ubicacion-lines">
+                    <th:block th:with="ubi=${copias.isEmpty() ? null : copias[0]['ubicacion_biblioteca']}">
+                        <span th:if="${ubi != null and ubi != 'No especificada'}"
+                              th:text="${#strings.replace(ubi, '|', ' / ')}"></span>
+                        <span th:if="${ubi == null or ubi == 'No especificada'}"
+                              class="no-ubicacion">No especificada</span>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

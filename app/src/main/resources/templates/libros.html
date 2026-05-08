@@ -297,7 +297,8 @@
                             <td th:text="${libro.numCopias}">0</td>
                             <td>
                                 <div class="actions-cell">
-                                    <button class="btn-detail" type="button">Ver detalles</button>
+                                    <a th:href="@{/libros/detalle/{id}(id=${libro.id})}"
+                                       class="btn-detail" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">Ver detalles</a>
                                     <a th:href="@{/libros/editar/{id}(id=${libro.id})}"
                                        class="btn-icon btn-edit" title="Editar"
                                        style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">&#9998;</a>

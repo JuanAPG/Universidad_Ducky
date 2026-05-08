@@ -170,6 +170,30 @@ public class LibroRepository {
         ), titulo);
     }
 
+    public java.util.Map<String, Object> findDetalleParaUsuario(int id) {
+        String sql = """
+                SELECT l.id_libro, l.nombre, l.tipo, l.anio, l.isbn,
+                       l.sinopsis, l.num_paginas, l.precio,
+                       e.nombre AS editorial,
+                       COALESCE(STRING_AGG(DISTINCT a.nombre, ', ' ORDER BY a.nombre), 'Sin autor') AS autores
+                FROM libro l
+                JOIN editorial e ON e.id_editorial = l.id_editorial
+                LEFT JOIN libroautor la ON la.id_libro = l.id_libro
+                LEFT JOIN autor a ON a.id_autor = la.id_autor
+                WHERE l.id_libro = ?
+                GROUP BY l.id_libro, l.nombre, l.tipo, l.anio, l.isbn,
+                         l.sinopsis, l.num_paginas, l.precio, e.nombre
+                """;
+        java.util.List<java.util.Map<String, Object>> rows = jdbcTemplate.queryForList(sql, id);
+        return rows.isEmpty() ? null : rows.get(0);
+    }
+
+    public java.util.List<java.util.Map<String, Object>> findCopiasByLibroId(int id) {
+        return jdbcTemplate.queryForList(
+                "SELECT id_copia, estado, COALESCE(ubicacion_biblioteca, 'No especificada') AS ubicacion_biblioteca " +
+                "FROM copia WHERE id_libro = ? ORDER BY id_copia", id);
+    }
+
     public List<LibroCard> findRandom(int cantidad) {
         String sql = """
                 SELECT l.id_libro,

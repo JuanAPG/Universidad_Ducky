@@ -177,6 +177,7 @@
         }
 
         .btn-detalle {
+            display: inline-block;
             padding: 8px 20px;
             border: none;
             border-radius: 10px;
@@ -185,6 +186,7 @@
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
+            text-decoration: none;
         }
 
         .btn-detalle:hover { background: #b07d10; }
@@ -235,7 +237,7 @@
                 <div class="card-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
                 <div class="card-rating-text">5 | 53 rese&ntilde;as</div>
                 <div class="card-footer">
-                    <button class="btn-detalle" type="button">Ver detalles</button>
+                    <a class="btn-detalle" th:href="@{/home/libro/{id}(id=${libro.id})}">Ver detalles</a>
                     <span th:switch="${libro.estado}">
                         <span th:case="'disponible'"  class="estado-badge estado-disponible">Disponible</span>
                         <span th:case="'prestado'"    class="estado-badge estado-prestado">En pr&eacute;stamo</span>

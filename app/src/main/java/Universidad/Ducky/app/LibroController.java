@@ -78,6 +78,22 @@ public class LibroController {
         return "redirect:/libros";
     }
 
+    // ── Detalle libro (solo lectura) ─────────────────────────────────────────
+
+    @GetMapping("/detalle/{id}")
+    public String detalleForm(@PathVariable int id, HttpSession session, Model model) {
+        Usuario usuario = getAdminOrRedirect(session);
+        if (usuario == null) return "redirect:/";
+
+        model.addAttribute("usuario", usuario);
+        model.addAttribute("libro", libroRepository.findDetalleById(id));
+        model.addAttribute("autorIdsActuales", libroRepository.findAutorIdsByLibroId(id));
+        model.addAttribute("autores", autorRepository.findAll());
+        model.addAttribute("editoriales", editorialRepository.findAll());
+        model.addAttribute("tipos", TIPOS);
+        return "detalle_libro_admin";
+    }
+
     // ── Editar libro ─────────────────────────────────────────────────────────
 
     @GetMapping("/editar/{id}")

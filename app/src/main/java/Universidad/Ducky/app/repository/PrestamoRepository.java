@@ -23,7 +23,8 @@ public class PrestamoRepository {
                 SELECT u.id_usuario, u.username, u.nombre, u.apellidos, u.tipo,
                        GREATEST(0, ? - (
                            SELECT COUNT(*) FROM prestamo p
-                           WHERE p.id_usuario = u.id_usuario AND p.fecha_fin >= CURRENT_DATE
+                           JOIN copia c ON c.id_copia = p.id_copia
+                           WHERE p.id_usuario = u.id_usuario AND c.estado = 'prestado'
                        )) AS prestamos_disponibles
                 FROM usuario u
                 WHERE u.username = ?
@@ -141,7 +142,9 @@ public class PrestamoRepository {
     @Transactional
     public Map<String, Object> crear(int idUsuario, int idCopia, LocalDate fechaInicio, LocalDate fechaFin) {
         Integer activos = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM prestamo p JOIN copia c ON c.id_copia = p.id_copia WHERE p.id_usuario = ? AND c.estado = 'prestado'",
+                "SELECT COUNT(*) FROM prestamo p " +
+                "JOIN copia c ON c.id_copia = p.id_copia " +
+                "WHERE p.id_usuario = ? AND c.estado = 'prestado'",
                 Integer.class, idUsuario);
         if (activos != null && activos >= MAX_PRESTAMOS) {
             return java.util.Map.of("error", "limite");
