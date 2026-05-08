@@ -157,6 +157,35 @@ public class ChatbotService {
                                     + "• Usuarios registrados: <b>" + usuarios + "</b>";
                         }),
 
+                new Regla(List.of("que es este sistema", "para que sirve", "objetivo", "proposito", "de que trata", "que hace el sistema"),
+                        () -> "🏛️ <b>Biblioteca Ducky</b> es un sistema de gestión bibliotecaria diseñado para digitalizar y automatizar los procesos de una biblioteca universitaria.<br><br>"
+                                + "Sus principales funciones son:<br>"
+                                + "• Registro y consulta del <b>catálogo de libros</b><br>"
+                                + "• Gestión de <b>préstamos y devoluciones</b><br>"
+                                + "• Control de <b>multas</b> por retraso o daño<br>"
+                                + "• Administración de <b>usuarios</b> y roles"),
+
+                new Regla(List.of("a quien va dirigido", "para quien es", "quien usa", "usuarios del sistema", "roles"),
+                        () -> "👥 El sistema está dirigido a tres tipos de usuarios:<br><br>"
+                                + "• 📚 <b>Bibliotecario</b> — gestiona préstamos, devoluciones y el catálogo de libros<br>"
+                                + "• ⚙️ <b>Administrador</b> — registra y administra los usuarios del sistema<br>"
+                                + "• 🎓 <b>Usuario (Alumno/Profesor)</b> — consulta el catálogo de libros disponibles"),
+
+                new Regla(List.of("como funciona", "flujo", "proceso general", "pasos"),
+                        () -> "⚙️ El flujo general del sistema es:<br><br>"
+                                + "1. El <b>admin</b> registra al usuario (alumno o profesor)<br>"
+                                + "2. El <b>bibliotecario</b> registra un préstamo buscando la matrícula del usuario y seleccionando el libro<br>"
+                                + "3. El sistema genera un <b>comprobante</b> con fecha límite (5 días hábiles)<br>"
+                                + "4. Al devolver, el bibliotecario registra la <b>devolución</b> e indica el estado del libro<br>"
+                                + "5. Si hay multa, queda registrada como <b>pendiente</b>"),
+
+                new Regla(List.of("tecnologia", "tecnologias", "con que esta hecho", "lenguaje", "framework"),
+                        () -> "🛠️ El sistema está desarrollado con:<br>"
+                                + "• <b>Java + Spring Boot</b> — lógica de negocio y API<br>"
+                                + "• <b>Thymeleaf</b> — plantillas HTML del lado del servidor<br>"
+                                + "• <b>PostgreSQL</b> — base de datos relacional<br>"
+                                + "• <b>HTML / CSS / JavaScript</b> — interfaz de usuario"),
+
                 new Regla(List.of("ayuda", "help", "que puedes hacer", "que sabes", "opciones", "temas"),
                         () -> "🤖 Puedo responder preguntas sobre:<br>"
                                 + "• <b>Préstamos</b> — qué son, cómo registrarlos, duración<br>"

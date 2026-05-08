@@ -175,6 +175,17 @@
         }
         .btn-prestar:hover { background: #003f6b; }
         .empty-msg { color: #999; font-size: 0.9rem; text-align: center; padding: 24px 0; }
+        .limite-banner {
+            display: none;
+            background: #fff0f0;
+            border: 1.5px solid #f5b8b8;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            color: #b71c1c;
+        }
+        .limite-banner .lb-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+        .limite-banner .lb-sub   { font-size: 0.82rem; opacity: 0.85; }
 
         /* Comprobante */
         .comprobante-grid {
@@ -330,6 +341,11 @@
                     <div class="meta" id="bannerMeta"></div>
                 </div>
 
+                <div id="limiteBanner" class="limite-banner">
+                    <div class="lb-title">&#9888; Límite de préstamos alcanzado</div>
+                    <div class="lb-sub">Este usuario ya tiene 3 préstamos activos. Debe devolver al menos uno antes de solicitar un nuevo préstamo.</div>
+                </div>
+
                 <div class="card">
                     <div class="search-bar">
                         <button type="button">&#9776;</button>
@@ -453,7 +469,15 @@
             'Matrícula: ' + usuarioActual.username +
             '  |  Préstamos Disponibles: ' + usuarioActual.prestamos_disponibles;
 
-        cargarLibros('');
+        const bloqueado = Number(usuarioActual.prestamos_disponibles) === 0;
+        document.getElementById('limiteBanner').style.display = bloqueado ? 'block' : 'none';
+
+        if (bloqueado) {
+            document.getElementById('bookList').innerHTML =
+                '<p class="empty-msg">No es posible realizar un préstamo en este momento.</p>';
+        } else {
+            cargarLibros('');
+        }
     }
 
     // ── Paso 2 ────────────────────────────────────────────────────────────────
@@ -509,6 +533,12 @@
             body: params.toString()
         });
 
+        if (res.status === 409) {
+            document.getElementById('limiteBanner').style.display = 'block';
+            document.getElementById('bookList').innerHTML =
+                '<p class="empty-msg">No es posible realizar un préstamo en este momento.</p>';
+            return;
+        }
         if (!res.ok) {
             alert('No se pudo registrar el préstamo. La copia ya no está disponible.');
             cargarLibros(document.getElementById('searchLibros').value);

@@ -140,6 +140,13 @@ public class PrestamoRepository {
 
     @Transactional
     public Map<String, Object> crear(int idUsuario, int idCopia, LocalDate fechaInicio, LocalDate fechaFin) {
+        Integer activos = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM prestamo p JOIN copia c ON c.id_copia = p.id_copia WHERE p.id_usuario = ? AND c.estado = 'prestado'",
+                Integer.class, idUsuario);
+        if (activos != null && activos >= MAX_PRESTAMOS) {
+            return java.util.Map.of("error", "limite");
+        }
+
         List<Map<String, Object>> copias = jdbcTemplate.queryForList(
                 "SELECT estado FROM copia WHERE id_copia = ? FOR UPDATE", idCopia);
         if (copias.isEmpty() || !"disponible".equals(copias.get(0).get("estado"))) {

@@ -132,6 +132,7 @@ public class BibliotecarioController {
         LocalDate devolucion = sumarDiasHabiles(hoy, 5);
         Map<String, Object> comprobante = prestamoRepository.crear(idUsuario, idCopia, hoy, devolucion);
         if (comprobante == null) return ResponseEntity.badRequest().build();
+        if (comprobante.containsKey("error")) return ResponseEntity.status(409).body(comprobante);
         comprobante.put("fechaInicio", hoy.toString());
         comprobante.put("fechaFin", devolucion.toString());
         return ResponseEntity.ok(comprobante);
